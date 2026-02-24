@@ -1,0 +1,39 @@
+<div class="app">
+  <app-login *ngIf="!isAuthenticated"></app-login>
+  
+  <div *ngIf="isAuthenticated" class="main-app">
+    <app-navbar></app-navbar>
+    
+    <div class="content">
+      <ng-container [ngSwitch]="currentPage">
+        <app-dashboard *ngSwitchCase="'dashboard'"></app-dashboard>
+        <app-courses *ngSwitchCase="'courses'"></app-courses>
+        <app-students *ngSwitchCase="'students'" [hidden]="!isTutor()"></app-students>
+        <app-enrollments *ngSwitchCase="'enrollments'" [hidden]="!isTutor()"></app-enrollments>
+        <app-complaints *ngSwitchCase="'complaints'"></app-complaints>
+        <app-clubs *ngSwitchCase="'clubs'"></app-clubs>
+        <app-quiz *ngSwitchCase="'quiz'"></app-quiz>
+        <app-users *ngSwitchCase="'users'" [hidden]="!isAdmin()"></app-users>
+      </ng-container>
+      
+      <div *ngIf="currentPage === 'students' && !isTutor()" class="access-denied">
+        <h2>🔒 Accès refusé</h2>
+        <p>Vous devez être Tuteur ou Administrateur pour accéder à cette page.</p>
+      </div>
+      
+      <div *ngIf="currentPage === 'enrollments' && !isTutor()" class="access-denied">
+        <h2>🔒 Accès refusé</h2>
+        <p>Vous devez être Tuteur ou Administrateur pour accéder à cette page.</p>
+      </div>
+      
+      <div *ngIf="currentPage === 'users' && !isAdmin()" class="access-denied">
+        <h2>🔒 Accès refusé</h2>
+        <p>Vous devez être Administrateur pour accéder à cette page.</p>
+      </div>
+    </div>
+    
+    <button class="logout-btn" (click)="logout()">
+      🚪 Déconnexion
+    </button>
+  </div>
+</div>
