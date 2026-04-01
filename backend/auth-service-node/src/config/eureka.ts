@@ -1,3 +1,4 @@
+// @ts-ignore
 import { Eureka } from 'eureka-js-client';
 
 const client = new Eureka({
@@ -23,7 +24,7 @@ const client = new Eureka({
 });
 
 export const registerWithEureka = () => {
-  client.start((error) => {
+  client.start((error: Error | null) => {
     if (error) {
       console.error('Eureka registration failed:', error);
     } else {

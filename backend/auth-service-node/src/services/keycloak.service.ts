@@ -68,6 +68,54 @@ export class KeycloakService {
     };
   }
 
+  async getUserInfo(accessToken: string) {
+    try {
+      const response = await axios.get(
+        `${this.baseUrl}/realms/${this.realm}/protocol/openid-connect/userinfo`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      return response.data;
+    } catch (error: any) {
+      console.error('Keycloak userinfo error:', error.response?.data || error.message);
+      // Si l'appel échoue, décoder le JWT directement
+      return this.decodeToken(accessToken);
+    }
+  }
+
+  // Décoder le JWT pour extraire les infos utilisateur
+  private decodeToken(token: string): any {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        Buffer.from(base64, 'base64')
+          .toString('utf-8')
+          .split('')
+          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+
+      const decoded = JSON.parse(jsonPayload);
+      
+      return {
+        sub: decoded.sub,
+        email: decoded.email,
+        preferred_username: decoded.preferred_username,
+        given_name: decoded.given_name,
+        family_name: decoded.family_name,
+        name: decoded.name,
+      };
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      throw new Error('Failed to decode token');
+    }
+  }
+
   async refreshToken(refreshToken: string) {
     const response = await axios.post(
       `${this.baseUrl}/realms/${this.realm}/protocol/openid-connect/token`,

@@ -43,10 +43,50 @@ export const login = async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body;
 
+    // Authentifier avec Keycloak
     const tokens = await keycloakService.login(username, password);
 
-    res.json(tokens);
+    // Récupérer les infos utilisateur depuis Keycloak
+    const keycloakUser = await keycloakService.getUserInfo(tokens.accessToken);
+
+    // Chercher ou créer l'utilisateur dans notre base
+    let user = await prisma.user.findUnique({
+      where: { username },
+    });
+
+    if (!user) {
+      // Si l'utilisateur n'existe pas, le créer
+      user = await prisma.user.create({
+        data: {
+          username,
+          email: keycloakUser.email || `${username}@englishflow.com`,
+          keycloakId: keycloakUser.sub,
+          firstName: keycloakUser.given_name,
+          lastName: keycloakUser.family_name,
+        },
+      });
+    } else if (!user.keycloakId) {
+      // Mettre à jour le keycloakId si nécessaire
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: { keycloakId: keycloakUser.sub },
+      });
+    }
+
+    // Retourner les tokens et les infos utilisateur
+    res.json({
+      ...tokens,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
+    });
   } catch (error: any) {
+    console.error('Login error:', error);
     res.status(401).json({ error: 'Invalid credentials' });
   }
 };

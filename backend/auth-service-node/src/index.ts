@@ -9,7 +9,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
+// Pas de CORS ici - géré par l'API Gateway
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
