@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-courses',
@@ -11,7 +12,7 @@ import { HttpClient } from '@angular/common/http';
     <div class="page">
       <div class="page-header">
         <h1>📚 Gestion des Cours</h1>
-        <button class="btn-primary" (click)="openModal()">+ Ajouter un cours</button>
+        <button *ngIf="canManageCourses()" class="btn-primary" (click)="openModal()">+ Ajouter un cours</button>
       </div>
       
       <div class="stats">
@@ -51,8 +52,8 @@ import { HttpClient } from '@angular/common/http';
               <td>{{course.durationHours}}h</td>
               <td><span class="badge" [class]="'badge-' + course.level.toLowerCase()">{{course.level}}</span></td>
               <td>
-                <button class="btn-edit" (click)="editCourse(course)">✏️ Modifier</button>
-                <button class="btn-delete" (click)="deleteCourse(course.id)">🗑️ Supprimer</button>
+                <button *ngIf="canManageCourses()" class="btn-edit" (click)="editCourse(course)">✏️ Modifier</button>
+                <button *ngIf="canManageCourses()" class="btn-delete" (click)="deleteCourse(course.id)">🗑️ Supprimer</button>
               </td>
             </tr>
           </tbody>
@@ -300,17 +301,24 @@ export class CoursesComponent implements OnInit {
   editMode = false;
   currentCourse: any = {};
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
+    console.log('CoursesComponent initialized');
     this.loadCourses();
   }
 
   loadCourses() {
+    console.log('Loading courses...');
     this.http.get<any[]>('http://localhost:8080/api/courses').subscribe({
       next: (data) => {
-        this.courses = data;
         console.log('Courses loaded:', data);
+        this.courses = data;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading courses:', err);
@@ -392,5 +400,9 @@ export class CoursesComponent implements OnInit {
 
   getAdvancedCount(): number {
     return this.courses.filter(c => c.level === 'ADVANCED').length;
+  }
+
+  canManageCourses(): boolean {
+    return this.authService.canManageCourses();
   }
 }

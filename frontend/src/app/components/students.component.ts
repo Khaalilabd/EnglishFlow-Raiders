@@ -1,564 +1,768 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { StudentsService, Student } from '../services/students.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-students',
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="page">
-      <div class="page-header">
-        <h1>👥 Gestion des Étudiants</h1>
-        <button class="btn-primary" (click)="openModal()">+ Ajouter un étudiant</button>
+    <div class="students-container">
+      <!-- Header -->
+      <div class="header">
+        <h1>
+          <i class="fas fa-user-graduate"></i>
+          Gestion des Étudiants
+        </h1>
+        <button *ngIf="canManageStudents()" class="btn-primary" (click)="openAddModal()">
+          <i class="fas fa-plus"></i>
+          Ajouter un étudiant
+        </button>
       </div>
-      
-      <div class="stats">
-        <div class="stat-card">
-          <h3>{{students.length}}</h3>
-          <p>Total Étudiants</p>
-        </div>
-        <div class="stat-card">
-          <h3>{{getTotalEnrollments()}}</h3>
-          <p>Inscriptions</p>
-        </div>
-        <div class="stat-card">
-          <h3>{{getAverageCoursesPerStudent()}}</h3>
-          <p>Cours/Étudiant</p>
-        </div>
+
+      <!-- Search Bar -->
+      <div class="search-bar">
+        <i class="fas fa-search"></i>
+        <input 
+          type="text" 
+          placeholder="Rechercher par nom, prénom ou email..."
+          [(ngModel)]="searchTerm"
+          (input)="filterStudents()"
+        />
       </div>
-      
-      <div class="cards-grid">
-        <div class="student-card" *ngFor="let student of students">
-          <div class="student-header">
-            <div class="avatar">{{getInitials(student)}}</div>
-            <div class="student-info">
-              <h3>{{student.firstName}} {{student.lastName}}</h3>
-              <p>{{student.email}}</p>
-            </div>
-          </div>
-          <div class="student-body">
-            <p class="enrollment-date">📅 Inscrit le {{formatDate(student.enrollmentDate)}}</p>
-            <button class="btn-view" (click)="viewStudentCourses(student)">
-              📚 Voir les cours ({{getStudentCoursesCount(student.id)}})
+
+      <!-- Loading State -->
+      <div *ngIf="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Chargement des étudiants...</p>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="error" class="error-message">
+        <i class="fas fa-exclamation-circle"></i>
+        {{ error }}
+      </div>
+
+      <!-- Students Table -->
+      <div *ngIf="!loading && !error" class="table-container">
+        <table class="students-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Prénom</th>
+              <th>Nom</th>
+              <th>Email</th>
+              <th>Date d'inscription</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let student of filteredStudents" class="student-row">
+              <td>{{ student.id }}</td>
+              <td>{{ student.firstName }}</td>
+              <td>{{ student.lastName }}</td>
+              <td>{{ student.email }}</td>
+              <td>{{ student.enrollmentDate | date:'dd/MM/yyyy' }}</td>
+              <td class="actions">
+                <button *ngIf="canManageStudents()" class="btn-icon btn-edit" (click)="openEditModal(student)" title="Modifier">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button *ngIf="canManageStudents()" class="btn-icon btn-delete" (click)="confirmDelete(student)" title="Supprimer">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredStudents.length === 0">
+              <td colspan="6" class="no-data">
+                <i class="fas fa-inbox"></i>
+                <p>Aucun étudiant trouvé</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Add/Edit Modal -->
+      <div *ngIf="showModal" class="modal-overlay" (click)="closeModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h2>
+              <i class="fas" [ngClass]="isEditMode ? 'fa-edit' : 'fa-plus'"></i>
+              {{ isEditMode ? 'Modifier l\'étudiant' : 'Ajouter un étudiant' }}
+            </h2>
+            <button class="btn-close" (click)="closeModal()">
+              <i class="fas fa-times"></i>
             </button>
           </div>
-          <div class="student-actions">
-            <button class="btn-edit" (click)="editStudent(student)">✏️</button>
-            <button class="btn-delete" (click)="deleteStudent(student.id)">🗑️</button>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Modal Formulaire -->
-      <div class="modal" *ngIf="showModal" (click)="closeModal()">
-        <div class="modal-content" (click)="$event.stopPropagation()">
-          <h2>{{editMode ? 'Modifier' : 'Ajouter'}} un étudiant</h2>
-          <form (ngSubmit)="saveStudent()">
-            <div class="form-row">
-              <div class="form-group">
-                <label>Prénom</label>
-                <input type="text" [(ngModel)]="currentStudent.firstName" name="firstName" required>
-              </div>
-              <div class="form-group">
-                <label>Nom</label>
-                <input type="text" [(ngModel)]="currentStudent.lastName" name="lastName" required>
-              </div>
-            </div>
+
+          <form (ngSubmit)="saveStudent()" class="modal-form">
             <div class="form-group">
-              <label>Email</label>
-              <input type="email" [(ngModel)]="currentStudent.email" name="email" required>
+              <label for="firstName">
+                <i class="fas fa-user"></i>
+                Prénom *
+              </label>
+              <input 
+                type="text" 
+                id="firstName"
+                [(ngModel)]="currentStudent.firstName"
+                name="firstName"
+                required
+                placeholder="Entrez le prénom"
+              />
             </div>
+
+            <div class="form-group">
+              <label for="lastName">
+                <i class="fas fa-user"></i>
+                Nom *
+              </label>
+              <input 
+                type="text" 
+                id="lastName"
+                [(ngModel)]="currentStudent.lastName"
+                name="lastName"
+                required
+                placeholder="Entrez le nom"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="email">
+                <i class="fas fa-envelope"></i>
+                Email *
+              </label>
+              <input 
+                type="email" 
+                id="email"
+                [(ngModel)]="currentStudent.email"
+                name="email"
+                required
+                placeholder="exemple@email.com"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="enrollmentDate">
+                <i class="fas fa-calendar"></i>
+                Date d'inscription
+              </label>
+              <input 
+                type="date" 
+                id="enrollmentDate"
+                [(ngModel)]="currentStudent.enrollmentDate"
+                name="enrollmentDate"
+              />
+            </div>
+
             <div class="modal-actions">
-              <button type="button" class="btn-secondary" (click)="closeModal()">Annuler</button>
-              <button type="submit" class="btn-primary">{{editMode ? 'Modifier' : 'Créer'}}</button>
+              <button type="button" class="btn-secondary" (click)="closeModal()">
+                Annuler
+              </button>
+              <button type="submit" class="btn-primary" [disabled]="saving">
+                <i class="fas" [ngClass]="saving ? 'fa-spinner fa-spin' : 'fa-save'"></i>
+                {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
+              </button>
             </div>
           </form>
         </div>
       </div>
-      
-      <!-- Modal Cours de l'étudiant (OpenFeign) -->
-      <div class="modal" *ngIf="showCoursesModal" (click)="closeCoursesModal()">
-        <div class="modal-content large" (click)="$event.stopPropagation()">
+
+      <!-- Delete Confirmation Modal -->
+      <div *ngIf="showDeleteModal" class="modal-overlay" (click)="closeDeleteModal()">
+        <div class="modal-content modal-small" (click)="$event.stopPropagation()">
           <div class="modal-header">
-            <h2>🔗 Cours de {{selectedStudentData?.student.firstName}} {{selectedStudentData?.student.lastName}}</h2>
-            <p class="openfeign-badge">Communication OpenFeign : Student Service → Courses Service</p>
+            <h2>
+              <i class="fas fa-exclamation-triangle"></i>
+              Confirmer la suppression
+            </h2>
           </div>
-          <div class="courses-list" *ngIf="selectedStudentData">
-            <div class="course-item" *ngFor="let course of selectedStudentData.courses">
-              <div class="course-icon">📚</div>
-              <div class="course-details">
-                <h4>{{course.title}}</h4>
-                <p>{{course.description}}</p>
-                <div class="course-meta">
-                  <span>👨‍🏫 {{course.instructor}}</span>
-                  <span>⏱️ {{course.durationHours}}h</span>
-                  <span class="badge" [class]="'badge-' + course.level.toLowerCase()">{{course.level}}</span>
-                </div>
-              </div>
-            </div>
-            <div *ngIf="selectedStudentData.courses.length === 0" class="no-courses">
-              Aucun cours inscrit
-            </div>
+
+          <div class="modal-body">
+            <p>Êtes-vous sûr de vouloir supprimer l'étudiant :</p>
+            <p class="student-name">{{ studentToDelete?.firstName }} {{ studentToDelete?.lastName }}</p>
+            <p class="warning">Cette action est irréversible.</p>
           </div>
+
           <div class="modal-actions">
-            <button class="btn-primary" (click)="closeCoursesModal()">Fermer</button>
+            <button type="button" class="btn-secondary" (click)="closeDeleteModal()">
+              Annuler
+            </button>
+            <button type="button" class="btn-danger" (click)="deleteStudent()" [disabled]="deleting">
+              <i class="fas" [ngClass]="deleting ? 'fa-spinner fa-spin' : 'fa-trash'"></i>
+              {{ deleting ? 'Suppression...' : 'Supprimer' }}
+            </button>
           </div>
         </div>
+      </div>
+
+      <!-- Success Message -->
+      <div *ngIf="successMessage" class="success-toast">
+        <i class="fas fa-check-circle"></i>
+        {{ successMessage }}
       </div>
     </div>
   `,
   styles: [`
-    .page {
+    .students-container {
+      padding: 2rem;
       max-width: 1400px;
       margin: 0 auto;
-      padding: 0 20px;
     }
-    
-    .page-header {
+
+    .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 30px;
+      margin-bottom: 2rem;
     }
-    
-    .page-header h1 {
-      color: white;
-      margin: 0;
-    }
-    
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-      margin-bottom: 30px;
-    }
-    
-    .stat-card {
-      background: white;
-      padding: 25px;
-      border-radius: 15px;
-      text-align: center;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    
-    .stat-card h3 {
-      font-size: 36px;
-      color: #667eea;
-      margin: 0 0 10px 0;
-    }
-    
-    .stat-card p {
-      color: #666;
-      margin: 0;
-    }
-    
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 20px;
-    }
-    
-    .student-card {
-      background: white;
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      transition: transform 0.3s, box-shadow 0.3s;
-      position: relative;
-    }
-    
-    .student-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-    }
-    
-    .student-header {
+
+    .header h1 {
+      font-size: 2rem;
+      color: #1a1a2e;
       display: flex;
       align-items: center;
-      gap: 15px;
-      margin-bottom: 15px;
+      gap: 0.75rem;
     }
-    
-    .avatar {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+    .header h1 i {
+      color: #6366f1;
+    }
+
+    .search-bar {
+      position: relative;
+      margin-bottom: 2rem;
+    }
+
+    .search-bar i {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6b7280;
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 3rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+
+    .search-bar input:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
       color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+    }
+
+    .table-container {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .students-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .students-table thead {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: white;
+    }
+
+    .students-table th {
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.875rem;
+      letter-spacing: 0.05em;
+    }
+
+    .students-table td {
+      padding: 1rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .student-row {
+      transition: all 0.3s;
+    }
+
+    .student-row:hover {
+      background: #f9fafb;
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-icon {
+      padding: 0.5rem;
+      border: none;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      transition: all 0.3s;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
-      font-weight: 600;
     }
-    
-    .student-info h3 {
-      margin: 0 0 5px 0;
-      color: #333;
-    }
-    
-    .student-info p {
-      margin: 0;
-      color: #666;
-      font-size: 14px;
-    }
-    
-    .student-body {
-      margin: 15px 0;
-    }
-    
-    .enrollment-date {
-      color: #666;
-      font-size: 14px;
-      margin-bottom: 15px;
-    }
-    
-    .btn-view {
-      width: 100%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      padding: 12px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    
-    .btn-view:hover {
-      transform: scale(1.02);
-    }
-    
-    .student-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 15px;
-      padding-top: 15px;
-      border-top: 1px solid #f0f0f0;
-    }
-    
-    .btn-edit, .btn-delete {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-      transition: transform 0.2s;
-    }
-    
+
     .btn-edit {
-      background: #4caf50;
+      background: #3b82f6;
       color: white;
     }
-    
+
+    .btn-edit:hover {
+      background: #2563eb;
+      transform: scale(1.1);
+    }
+
     .btn-delete {
-      background: #f44336;
+      background: #ef4444;
       color: white;
     }
-    
-    .btn-edit:hover, .btn-delete:hover {
-      transform: scale(1.05);
+
+    .btn-delete:hover {
+      background: #dc2626;
+      transform: scale(1.1);
     }
-    
-    .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    
-    .btn-primary:hover {
-      transform: translateY(-2px);
-    }
-    
-    .btn-secondary {
-      background: #e0e0e0;
-      color: #333;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    
-    .modal {
+
+    .modal-overlay {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0, 0, 0, 0.5);
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       z-index: 1000;
+      animation: fadeIn 0.3s;
     }
-    
+
     .modal-content {
       background: white;
-      padding: 30px;
-      border-radius: 15px;
+      border-radius: 1rem;
+      padding: 2rem;
+      max-width: 500px;
       width: 90%;
-      max-width: 600px;
       max-height: 90vh;
       overflow-y: auto;
+      animation: slideUp 0.3s;
     }
-    
-    .modal-content.large {
-      max-width: 800px;
+
+    .modal-small {
+      max-width: 400px;
     }
-    
+
     .modal-header {
-      margin-bottom: 20px;
-    }
-    
-    .modal-content h2 {
-      margin: 0 0 10px 0;
-      color: #333;
-    }
-    
-    .openfeign-badge {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      color: white;
-      padding: 10px 15px;
-      border-radius: 8px;
-      font-weight: 600;
-      display: inline-block;
-    }
-    
-    .courses-list {
-      margin: 20px 0;
-    }
-    
-    .course-item {
       display: flex;
-      gap: 15px;
-      padding: 20px;
-      background: #f8f9fa;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      border-left: 4px solid #667eea;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
     }
-    
-    .course-icon {
-      font-size: 32px;
-    }
-    
-    .course-details h4 {
-      margin: 0 0 8px 0;
-      color: #333;
-    }
-    
-    .course-details p {
-      margin: 0 0 10px 0;
-      color: #666;
-      font-size: 14px;
-    }
-    
-    .course-meta {
+
+    .modal-header h2 {
+      font-size: 1.5rem;
+      color: #1a1a2e;
       display: flex;
-      gap: 15px;
-      font-size: 14px;
-      color: #666;
+      align-items: center;
+      gap: 0.5rem;
     }
-    
-    .badge {
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
+
+    .btn-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #6b7280;
+      transition: color 0.3s;
     }
-    
-    .badge-beginner { background: #e3f2fd; color: #1976d2; }
-    .badge-intermediate { background: #fff3e0; color: #f57c00; }
-    .badge-advanced { background: #fce4ec; color: #c2185b; }
-    
-    .no-courses {
-      text-align: center;
-      padding: 40px;
-      color: #999;
+
+    .btn-close:hover {
+      color: #1a1a2e;
     }
-    
+
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
     .form-group {
-      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
     }
-    
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-    
-    label {
-      display: block;
-      margin-bottom: 8px;
-      color: #333;
+
+    .form-group label {
       font-weight: 600;
+      color: #374151;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
-    
-    input {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
-      font-size: 14px;
+
+    .form-group input {
+      padding: 0.75rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      transition: all 0.3s;
     }
-    
-    input:focus {
+
+    .form-group input:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
     }
-    
+
     .modal-actions {
       display: flex;
-      justify-content: flex-end;
-      gap: 15px;
-      margin-top: 30px;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      padding: 0.75rem;
+      border: 2px solid #e5e7eb;
+      background: white;
+      color: #374151;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-secondary:hover {
+      background: #f9fafb;
+      border-color: #d1d5db;
+    }
+
+    .btn-danger {
+      flex: 1;
+      padding: 0.75rem;
+      border: none;
+      background: #ef4444;
+      color: white;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.3s;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    .modal-body {
+      padding: 1rem 0;
+    }
+
+    .student-name {
+      font-weight: 600;
+      color: #6366f1;
+      font-size: 1.125rem;
+      margin: 0.5rem 0;
+    }
+
+    .warning {
+      color: #ef4444;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 3rem;
+    }
+
+    .spinner {
+      border: 4px solid #f3f4f6;
+      border-top: 4px solid #6366f1;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    .error-message {
+      background: #fee2e2;
+      color: #dc2626;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .success-toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #10b981;
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      animation: slideInRight 0.3s;
+      z-index: 1001;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 3rem;
+      color: #6b7280;
+    }
+
+    .no-data i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(100px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   `]
 })
 export class StudentsComponent implements OnInit {
-  students: any[] = [];
-  studentCourses: Map<number, number> = new Map();
-  showModal = false;
-  showCoursesModal = false;
-  editMode = false;
-  currentStudent: any = {};
-  selectedStudentData: any = null;
+  students: Student[] = [];
+  filteredStudents: Student[] = [];
+  searchTerm: string = '';
+  
+  showModal: boolean = false;
+  showDeleteModal: boolean = false;
+  isEditMode: boolean = false;
+  
+  currentStudent: Student = this.getEmptyStudent();
+  studentToDelete: Student | null = null;
+  
+  loading: boolean = false;
+  saving: boolean = false;
+  deleting: boolean = false;
+  error: string = '';
+  successMessage: string = '';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private studentsService: StudentsService,
+    private cdr: ChangeDetectorRef,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
+    console.log('StudentsComponent initialized');
     this.loadStudents();
   }
 
   loadStudents() {
-    this.http.get<any[]>('http://localhost:8080/api/students').subscribe({
+    this.loading = true;
+    this.error = '';
+    this.cdr.detectChanges();
+    
+    this.studentsService.getAllStudents().subscribe({
       next: (data) => {
-        this.students = data;
         console.log('Students loaded:', data);
-        // Charger le nombre de cours pour chaque étudiant
-        this.students.forEach(student => {
-          this.http.get<any>(`http://localhost:8080/api/students/${student.id}/courses`).subscribe({
-            next: (data) => this.studentCourses.set(student.id, data.courses.length),
-            error: (err) => console.error('Error loading student courses:', err)
-          });
-        });
+        this.students = data;
+        this.filteredStudents = data;
+        this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading students:', err);
-        alert('Erreur lors du chargement des étudiants');
+        this.error = 'Erreur lors du chargement des étudiants';
+        this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
 
-  getInitials(student: any): string {
-    return (student.firstName[0] + student.lastName[0]).toUpperCase();
+  filterStudents() {
+    const term = this.searchTerm.toLowerCase();
+    this.filteredStudents = this.students.filter(student =>
+      student.firstName.toLowerCase().includes(term) ||
+      student.lastName.toLowerCase().includes(term) ||
+      student.email.toLowerCase().includes(term)
+    );
   }
 
-  formatDate(date: string): string {
-    return new Date(date).toLocaleDateString('fr-FR');
-  }
-
-  getStudentCoursesCount(studentId: number): number {
-    return this.studentCourses.get(studentId) || 0;
-  }
-
-  getTotalEnrollments(): number {
-    let total = 0;
-    this.studentCourses.forEach(count => total += count);
-    return total;
-  }
-
-  getAverageCoursesPerStudent(): string {
-    if (this.students.length === 0) return '0';
-    return (this.getTotalEnrollments() / this.students.length).toFixed(1);
-  }
-
-  openModal() {
-    this.editMode = false;
-    this.currentStudent = {};
+  openAddModal() {
+    this.isEditMode = false;
+    this.currentStudent = this.getEmptyStudent();
     this.showModal = true;
   }
 
-  editStudent(student: any) {
-    this.editMode = true;
+  openEditModal(student: Student) {
+    this.isEditMode = true;
     this.currentStudent = { ...student };
     this.showModal = true;
   }
 
   closeModal() {
     this.showModal = false;
-    this.currentStudent = {};
+    this.currentStudent = this.getEmptyStudent();
   }
 
   saveStudent() {
-    // Validation
-    if (!this.currentStudent.firstName || !this.currentStudent.lastName || !this.currentStudent.email) {
-      alert('Veuillez remplir tous les champs obligatoires');
-      return;
-    }
-
-    if (this.editMode) {
-      this.http.put(`http://localhost:8080/api/students/${this.currentStudent.id}`, this.currentStudent)
-        .subscribe({
-          next: () => {
-            this.loadStudents();
-            this.closeModal();
-          },
-          error: (err) => {
-            console.error('Error updating student:', err);
-            alert('Erreur lors de la modification de l\'étudiant');
-          }
-        });
+    this.saving = true;
+    this.cdr.detectChanges();
+    
+    if (this.isEditMode && this.currentStudent.id) {
+      console.log('Updating student:', this.currentStudent);
+      this.studentsService.updateStudent(this.currentStudent.id, this.currentStudent).subscribe({
+        next: (response) => {
+          console.log('Student updated successfully:', response);
+          this.showSuccess('Étudiant modifié avec succès');
+          this.saving = false;
+          this.closeModal();
+          this.loadStudents();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error updating student:', err);
+          this.error = 'Erreur lors de la modification';
+          this.saving = false;
+          this.cdr.detectChanges();
+        }
+      });
     } else {
-      // Create - Remove id and add enrollmentDate
-      const studentData = {
-        firstName: this.currentStudent.firstName,
-        lastName: this.currentStudent.lastName,
-        email: this.currentStudent.email,
-        enrollmentDate: new Date().toISOString().split('T')[0]
-      };
-      
-      this.http.post('http://localhost:8080/api/students', studentData)
-        .subscribe({
-          next: () => {
-            this.loadStudents();
-            this.closeModal();
-          },
-          error: (err) => {
-            console.error('Error creating student:', err);
-            alert('Erreur lors de la création de l\'étudiant');
-          }
-        });
+      console.log('Creating student:', this.currentStudent);
+      this.studentsService.createStudent(this.currentStudent).subscribe({
+        next: (response) => {
+          console.log('Student created successfully:', response);
+          this.showSuccess('Étudiant ajouté avec succès');
+          this.saving = false;
+          this.closeModal();
+          this.loadStudents();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error creating student:', err);
+          this.error = 'Erreur lors de l\'ajout';
+          this.saving = false;
+          this.cdr.detectChanges();
+        }
+      });
     }
   }
 
-  deleteStudent(id: number) {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cet étudiant ?')) {
-      this.http.delete(`http://localhost:8080/api/students/${id}`)
-        .subscribe(() => this.loadStudents());
-    }
+  confirmDelete(student: Student) {
+    this.studentToDelete = student;
+    this.showDeleteModal = true;
   }
 
-  viewStudentCourses(student: any) {
-    this.http.get<any>(`http://localhost:8080/api/students/${student.id}/courses`).subscribe({
-      next: (data) => {
-        this.selectedStudentData = data;
-        this.showCoursesModal = true;
+  closeDeleteModal() {
+    this.showDeleteModal = false;
+    this.studentToDelete = null;
+  }
+
+  deleteStudent() {
+    if (!this.studentToDelete?.id) return;
+    
+    this.deleting = true;
+    this.cdr.detectChanges();
+    
+    console.log('Deleting student:', this.studentToDelete.id);
+    this.studentsService.deleteStudent(this.studentToDelete.id).subscribe({
+      next: () => {
+        console.log('Student deleted successfully');
+        this.showSuccess('Étudiant supprimé avec succès');
+        this.deleting = false;
+        this.closeDeleteModal();
+        this.loadStudents();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error deleting student:', err);
+        this.error = 'Erreur lors de la suppression';
+        this.deleting = false;
+        this.cdr.detectChanges();
       }
     });
   }
 
-  closeCoursesModal() {
-    this.showCoursesModal = false;
-    this.selectedStudentData = null;
+  showSuccess(message: string) {
+    this.successMessage = message;
+    this.cdr.detectChanges();
+    setTimeout(() => {
+      this.successMessage = '';
+      this.cdr.detectChanges();
+    }, 3000);
+  }
+
+  getEmptyStudent(): Student {
+    return {
+      firstName: '',
+      lastName: '',
+      email: '',
+      enrollmentDate: new Date().toISOString().split('T')[0]
+    };
+  }
+
+  canManageStudents(): boolean {
+    return this.authService.canManageStudents();
   }
 }

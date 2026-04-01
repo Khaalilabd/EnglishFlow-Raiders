@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-complaints',
@@ -44,9 +45,44 @@ import { HttpClient } from '@angular/common/http';
             <span class="date">📅 {{formatDate(complaint.createdAt)}}</span>
           </div>
           <div class="complaint-actions">
-            <button class="btn-edit" (click)="editComplaint(complaint)">✏️ Modifier</button>
-            <button class="btn-delete" (click)="deleteComplaint(complaint.id)">🗑️ Supprimer</button>
+            <button *ngIf="canManageComplaints() && complaint.status !== 'RESOLVED' && complaint.status !== 'CLOSED'" 
+                    class="btn-resolve" (click)="openResolveModal(complaint)">✅ Traiter</button>
+            <button *ngIf="canManageComplaints()" class="btn-edit" (click)="editComplaint(complaint)">✏️ Modifier</button>
+            <button *ngIf="canManageComplaints()" class="btn-delete" (click)="deleteComplaint(complaint.id)">🗑️ Supprimer</button>
           </div>
+          
+          <div class="complaint-response" *ngIf="complaint.response">
+            <h4>📝 Réponse:</h4>
+            <p>{{complaint.response}}</p>
+            <small *ngIf="complaint.handledBy">Traité par: {{complaint.handledBy}} le {{formatDate(complaint.resolvedAt)}}</small>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Modal de résolution -->
+      <div class="modal" *ngIf="showResolveModal" (click)="closeResolveModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <h2>🔧 Traiter la réclamation</h2>
+          <h3>{{selectedComplaint?.title}}</h3>
+          <form (ngSubmit)="resolveComplaint()">
+            <div class="form-group">
+              <label>Statut</label>
+              <select [(ngModel)]="resolution.status" name="status" required>
+                <option value="IN_PROGRESS">En cours de traitement</option>
+                <option value="RESOLVED">Résolue</option>
+                <option value="CLOSED">Fermée</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Réponse / Solution</label>
+              <textarea [(ngModel)]="resolution.response" name="response" rows="5" 
+                        placeholder="Décrivez la solution apportée ou les actions entreprises..." required></textarea>
+            </div>
+            <div class="modal-actions">
+              <button type="button" class="btn-secondary" (click)="closeResolveModal()">Annuler</button>
+              <button type="submit" class="btn-primary">Enregistrer le traitement</button>
+            </div>
+          </form>
         </div>
       </div>
       
@@ -132,8 +168,14 @@ import { HttpClient } from '@angular/common/http';
     .complaint-actions { display: flex; gap: 10px; padding-top: 15px; border-top: 1px solid #f0f0f0; }
     .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; }
     .btn-secondary { background: #e0e0e0; color: #333; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-resolve { flex: 1; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .btn-resolve:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
     .btn-edit { flex: 1; background: #4caf50; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; }
     .btn-delete { flex: 1; background: #f44336; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; }
+    .complaint-response { margin-top: 15px; padding: 15px; background: #f0fdf4; border-left: 4px solid #10b981; border-radius: 8px; }
+    .complaint-response h4 { margin: 0 0 10px 0; color: #059669; font-size: 14px; }
+    .complaint-response p { margin: 0 0 8px 0; color: #333; }
+    .complaint-response small { color: #666; font-size: 12px; }
     .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
     .modal-content { background: white; padding: 30px; border-radius: 15px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
     .modal-content h2 { margin: 0 0 20px 0; color: #333; }
@@ -148,18 +190,36 @@ import { HttpClient } from '@angular/common/http';
 export class ComplaintsComponent implements OnInit {
   complaints: any[] = [];
   showModal = false;
+  showResolveModal = false;
   editMode = false;
   currentComplaint: any = {};
+  selectedComplaint: any = null;
+  resolution: any = {
+    status: 'IN_PROGRESS',
+    response: '',
+    handledBy: '',
+    handledByUserId: null
+  };
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
+    console.log('ComplaintsComponent initialized');
     this.loadComplaints();
   }
 
   loadComplaints() {
+    console.log('Loading complaints...');
     this.http.get<any[]>('http://localhost:8080/api/complaints').subscribe({
-      next: (data) => this.complaints = data,
+      next: (data) => {
+        console.log('Complaints loaded:', data);
+        this.complaints = data;
+        this.cdr.detectChanges();
+      },
       error: (err) => console.error('Error:', err)
     });
   }
@@ -211,5 +271,44 @@ export class ComplaintsComponent implements OnInit {
 
   formatDate(date: string): string {
     return new Date(date).toLocaleDateString('fr-FR');
+  }
+
+  canManageComplaints(): boolean {
+    return this.authService.canViewAllComplaints();
+  }
+  
+  openResolveModal(complaint: any) {
+    this.selectedComplaint = complaint;
+    this.resolution = {
+      status: 'IN_PROGRESS',
+      response: complaint.response || '',
+      handledBy: localStorage.getItem('user_firstname') + ' ' + localStorage.getItem('user_lastname'),
+      handledByUserId: null // Vous pouvez ajouter l'ID si nécessaire
+    };
+    this.showResolveModal = true;
+  }
+  
+  closeResolveModal() {
+    this.showResolveModal = false;
+    this.selectedComplaint = null;
+  }
+  
+  resolveComplaint() {
+    if (!this.selectedComplaint) return;
+    
+    this.http.patch(
+      `http://localhost:8080/api/complaints/${this.selectedComplaint.id}/resolve`,
+      this.resolution
+    ).subscribe({
+      next: () => {
+        this.loadComplaints();
+        this.closeResolveModal();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error resolving complaint:', err);
+        alert('Erreur lors du traitement de la réclamation');
+      }
+    });
   }
 }

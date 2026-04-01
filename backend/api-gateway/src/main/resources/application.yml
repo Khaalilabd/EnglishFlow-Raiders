@@ -29,6 +29,14 @@ spring:
             - Path=/api/students/**
           filters:
             - StripPrefix=1
+        
+        - id: enrollments-service
+          uri: lb://students-service
+          predicates:
+            - Path=/api/enrollments/**
+          filters:
+            - StripPrefix=1
+            - RewritePath=/enrollments, /students/enrollments
             
         - id: complaints-service
           uri: lb://complaints-service
@@ -52,6 +60,7 @@ spring:
               - GET
               - POST
               - PUT
+              - PATCH
               - DELETE
               - OPTIONS
             allowed-headers: "*"

@@ -134,4 +134,8 @@ public class StudentService {
         student.setEnrollmentDate(dto.getEnrollmentDate());
         return student;
     }
+    
+    public List<StudentCourse> getAllEnrollments() {
+        return studentCourseRepository.findAll();
+    }
 }

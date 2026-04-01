@@ -60,4 +60,9 @@ public class StudentController {
         studentService.deleteStudent(id);
         return ResponseEntity.noContent().build();
     }
+    
+    @GetMapping("/enrollments")
+    public ResponseEntity<List<com.microservices.students.entity.StudentCourse>> getAllEnrollments() {
+        return ResponseEntity.ok(studentService.getAllEnrollments());
+    }
 }

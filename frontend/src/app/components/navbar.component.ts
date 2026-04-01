@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   template: `
     <div class="sidebar">
       <div class="sidebar-header">
@@ -25,7 +27,7 @@ import { CommonModule } from '@angular/common';
       <div class="sidebar-nav">
         <div class="nav-section">
           <span class="nav-label">PRINCIPAL</span>
-          <a [class.active]="currentPage === 'dashboard'" (click)="navigate('dashboard')" class="nav-item">
+          <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="3" width="7" height="7" rx="1"/>
               <rect x="14" y="3" width="7" height="7" rx="1"/>
@@ -33,38 +35,51 @@ import { CommonModule } from '@angular/common';
               <rect x="3" y="14" width="7" height="7" rx="1"/>
             </svg>
             <span>Dashboard</span>
-            @if (currentPage === 'dashboard') {
-              <div class="active-indicator"></div>
-            }
           </a>
 
-          <a [class.active]="currentPage === 'courses'" (click)="navigate('courses')" class="nav-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-            </svg>
-            <span>Cours</span>
-            @if (currentPage === 'courses') {
-              <div class="active-indicator"></div>
-            }
-          </a>
+          @if (authService.isStudent()) {
+            <a routerLink="/my-courses" routerLinkActive="active" class="nav-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+              </svg>
+              <span>Mes Cours</span>
+            </a>
+          } @else {
+            <a routerLink="/courses" routerLinkActive="active" class="nav-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+              </svg>
+              <span>Cours</span>
+            </a>
+          }
 
-          <a [class.active]="currentPage === 'quiz'" (click)="navigate('quiz')" class="nav-item">
+          <a routerLink="/quiz" routerLinkActive="active" class="nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M9 11l3 3L22 4"/>
               <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
             </svg>
             <span>Quiz</span>
-            @if (currentPage === 'quiz') {
-              <div class="active-indicator"></div>
-            }
           </a>
         </div>
 
-        @if (isTutor()) {
-          <div class="nav-section">
-            <span class="nav-label">GESTION</span>
-            <a [class.active]="currentPage === 'students'" (click)="navigate('students')" class="nav-item">
+        <div class="nav-section">
+          <span class="nav-label">GESTION</span>
+          
+          @if (canManageStudents()) {
+            <a routerLink="/users-approval" routerLinkActive="active" class="nav-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="8.5" cy="7" r="4"/>
+                <polyline points="17 11 19 13 23 9"/>
+              </svg>
+              <span>Approbation</span>
+            </a>
+          }
+
+          @if (canManageStudents()) {
+            <a routerLink="/students" routerLinkActive="active" class="nav-item">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                 <circle cx="9" cy="7" r="4"/>
@@ -72,12 +87,11 @@ import { CommonModule } from '@angular/common';
                 <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
               </svg>
               <span>Étudiants</span>
-              @if (currentPage === 'students') {
-                <div class="active-indicator"></div>
-              }
             </a>
+          }
 
-            <a [class.active]="currentPage === 'enrollments'" (click)="navigate('enrollments')" class="nav-item">
+          @if (canManageEnrollments()) {
+            <a routerLink="/enrollments" routerLinkActive="active" class="nav-item">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                 <polyline points="14 2 14 8 20 8"/>
@@ -85,43 +99,64 @@ import { CommonModule } from '@angular/common';
                 <line x1="16" y1="17" x2="8" y2="17"/>
               </svg>
               <span>Inscriptions</span>
-              @if (currentPage === 'enrollments') {
-                <div class="active-indicator"></div>
-              }
             </a>
-          </div>
-        }
+          }
+        </div>
 
         <div class="nav-section">
           <span class="nav-label">COMMUNAUTÉ</span>
-          <a [class.active]="currentPage === 'clubs'" (click)="navigate('clubs')" class="nav-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
-            <span>Clubs</span>
-            @if (currentPage === 'clubs') {
-              <div class="active-indicator"></div>
-            }
-          </a>
+          
+          @if (authService.isStudent()) {
+            <a routerLink="/my-clubs" routerLinkActive="active" class="nav-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+              <span>Mes Clubs</span>
+            </a>
+            
+            <a routerLink="/my-quiz-history" routerLinkActive="active" class="nav-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 11l3 3L22 4"/>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+              </svg>
+              <span>Historique Quiz</span>
+            </a>
+          } @else {
+            <a routerLink="/clubs" routerLinkActive="active" class="nav-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+              <span>Clubs</span>
+            </a>
+          }
 
-          <a [class.active]="currentPage === 'complaints'" (click)="navigate('complaints')" class="nav-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-            </svg>
-            <span>Réclamations</span>
-            @if (currentPage === 'complaints') {
-              <div class="active-indicator"></div>
-            }
-          </a>
+          @if (authService.isStudent()) {
+            <a routerLink="/my-complaints" routerLinkActive="active" class="nav-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              <span>Mes Réclamations</span>
+            </a>
+          } @else {
+            <a routerLink="/complaints" routerLinkActive="active" class="nav-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              <span>Réclamations</span>
+            </a>
+          }
         </div>
 
         @if (isAdmin()) {
           <div class="nav-section">
             <span class="nav-label">ADMINISTRATION</span>
-            <a [class.active]="currentPage === 'users'" (click)="navigate('users')" class="nav-item">
+            <a routerLink="/users" routerLinkActive="active" class="nav-item">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                 <circle cx="8.5" cy="7" r="4"/>
@@ -129,9 +164,6 @@ import { CommonModule } from '@angular/common';
                 <line x1="23" y1="11" x2="17" y2="11"/>
               </svg>
               <span>Utilisateurs</span>
-              @if (currentPage === 'users') {
-                <div class="active-indicator"></div>
-              }
             </a>
           </div>
         }
@@ -440,30 +472,39 @@ import { CommonModule } from '@angular/common';
   `]
 })
 export class NavbarComponent implements OnInit {
-  currentPage = 'dashboard';
   userRole = '';
   userName = '';
   
-  ngOnInit() {
-    this.userRole = localStorage.getItem('user_role') || '';
-    this.userName = localStorage.getItem('user_firstname') || localStorage.getItem('username') || 'User';
-    
-    window.addEventListener('navigate', (event: any) => {
-      this.currentPage = event.detail;
-    });
-  }
+  constructor(public authService: AuthService) {}
   
-  navigate(page: string) {
-    this.currentPage = page;
-    window.dispatchEvent(new CustomEvent('navigate', { detail: page }));
+  ngOnInit() {
+    const userInfo = this.authService.getUserInfo();
+    this.userRole = userInfo.role || '';
+    this.userName = userInfo.firstName || userInfo.username;
   }
   
   isAdmin(): boolean {
-    return this.userRole === 'ADMIN';
+    return this.authService.isAdmin();
   }
   
   isTutor(): boolean {
-    return this.userRole === 'TUTOR' || this.userRole === 'ADMIN';
+    return this.authService.isTutorOrAdmin();
+  }
+
+  canManageStudents(): boolean {
+    return this.authService.canManageStudents();
+  }
+
+  canManageEnrollments(): boolean {
+    return this.authService.canManageEnrollments();
+  }
+
+  canManageClubs(): boolean {
+    return this.authService.canManageClubs();
+  }
+
+  canViewComplaints(): boolean {
+    return this.authService.canViewAllComplaints() || this.authService.canSubmitComplaints();
   }
 
   getUserName(): string {
@@ -471,10 +512,9 @@ export class NavbarComponent implements OnInit {
   }
 
   getUserInitials(): string {
-    const firstName = localStorage.getItem('user_firstname') || '';
-    const lastName = localStorage.getItem('user_lastname') || '';
-    if (firstName && lastName) {
-      return (firstName[0] + lastName[0]).toUpperCase();
+    const userInfo = this.authService.getUserInfo();
+    if (userInfo.firstName && userInfo.lastName) {
+      return (userInfo.firstName[0] + userInfo.lastName[0]).toUpperCase();
     }
     return this.userName.substring(0, 2).toUpperCase();
   }
@@ -489,7 +529,6 @@ export class NavbarComponent implements OnInit {
   }
 
   logout() {
-    localStorage.clear();
-    window.location.reload();
+    this.authService.logout();
   }
 }

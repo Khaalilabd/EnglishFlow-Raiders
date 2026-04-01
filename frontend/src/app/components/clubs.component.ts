@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-clubs',
@@ -11,7 +12,7 @@ import { HttpClient } from '@angular/common/http';
     <div class="page">
       <div class="page-header">
         <h1>🎭 Gestion des Clubs</h1>
-        <button class="btn-primary" (click)="openModal()">+ Nouveau club</button>
+        <button *ngIf="canManageClubs()" class="btn-primary" (click)="openModal()">+ Nouveau club</button>
       </div>
       
       <div class="clubs-grid">
@@ -35,8 +36,18 @@ import { HttpClient } from '@angular/common/http';
             </div>
           </div>
           <div class="club-actions">
-            <button class="btn-edit" (click)="editClub(club)">✏️</button>
-            <button class="btn-delete" (click)="deleteClub(club.id)">🗑️</button>
+            @if (canManageClubs()) {
+              <button class="btn-edit" (click)="editClub(club)">✏️</button>
+              <button class="btn-delete" (click)="deleteClub(club.id)">🗑️</button>
+            } @else if (authService.isStudent()) {
+              <button class="btn-join" (click)="joinClub(club)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Rejoindre
+              </button>
+            }
           </div>
         </div>
       </div>
@@ -100,6 +111,23 @@ import { HttpClient } from '@angular/common/http';
     .btn-secondary { background: #e0e0e0; color: #333; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; }
     .btn-edit { flex: 1; background: #4caf50; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; }
     .btn-delete { flex: 1; background: #f44336; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; }
+    .btn-join { 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+      color: white; 
+      border: none; 
+      padding: 10px 20px; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .btn-join:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
     .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
     .modal-content { background: white; padding: 30px; border-radius: 15px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
     .modal-content h2 { margin: 0 0 20px 0; color: #333; }
@@ -117,15 +145,25 @@ export class ClubsComponent implements OnInit {
   editMode = false;
   currentClub: any = {};
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef,
+    public authService: AuthService
+  ) {}
 
   ngOnInit() {
+    console.log('ClubsComponent initialized');
     this.loadClubs();
   }
 
   loadClubs() {
+    console.log('Loading clubs...');
     this.http.get<any[]>('http://localhost:8080/api/clubs').subscribe({
-      next: (data) => this.clubs = data,
+      next: (data) => {
+        console.log('Clubs loaded:', data);
+        this.clubs = data;
+        this.cdr.detectChanges();
+      },
       error: (err) => console.error('Error:', err)
     });
   }
@@ -169,5 +207,15 @@ export class ClubsComponent implements OnInit {
         error: (err) => console.error('Error:', err)
       });
     }
+  }
+
+  canManageClubs(): boolean {
+    return this.authService.canManageClubs();
+  }
+
+  joinClub(club: any) {
+    alert(`Fonctionnalité "Rejoindre le club ${club.name}" sera bientôt disponible!`);
+    // TODO: Implémenter la logique pour rejoindre un club
+    // this.http.post(`http://localhost:8080/api/clubs/${club.id}/members`, { studentId: ... })
   }
 }

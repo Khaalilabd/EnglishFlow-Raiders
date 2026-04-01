@@ -37,6 +37,12 @@ public class Complaint {
     
     private String response;
     
+    private String handledBy; // Nom de l'admin/tuteur qui a traité
+    
+    private Long handledByUserId; // ID de l'admin/tuteur
+    
+    private LocalDateTime resolvedAt; // Date de résolution
+    
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

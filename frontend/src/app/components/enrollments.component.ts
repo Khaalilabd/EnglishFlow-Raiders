@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-enrollments',
@@ -11,7 +12,7 @@ import { HttpClient } from '@angular/common/http';
     <div class="page">
       <div class="page-header">
         <h1>📝 Gestion des Inscriptions</h1>
-        <button class="btn-primary" (click)="openModal()">+ Nouvelle inscription</button>
+        <button *ngIf="canManageEnrollments()" class="btn-primary" (click)="openModal()">+ Nouvelle inscription</button>
       </div>
       
       <div class="stats">
@@ -49,7 +50,7 @@ import { HttpClient } from '@angular/common/http';
               <td><span class="badge" [class]="'badge-' + enrollment.courseLevel.toLowerCase()">{{enrollment.courseLevel}}</span></td>
               <td>{{formatDate(enrollment.enrollmentDate)}}</td>
               <td>
-                <button class="btn-delete" (click)="deleteEnrollment(enrollment)">🗑️ Désinscrire</button>
+                <button *ngIf="canManageEnrollments()" class="btn-delete" (click)="deleteEnrollment(enrollment)">🗑️ Désinscrire</button>
               </td>
             </tr>
           </tbody>
@@ -286,9 +287,14 @@ export class EnrollmentsComponent implements OnInit {
   selectedStudentId: any = '';
   selectedCourseId: any = '';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
+    console.log('EnrollmentsComponent initialized');
     this.loadData();
   }
 
@@ -299,24 +305,36 @@ export class EnrollmentsComponent implements OnInit {
   }
 
   loadStudents() {
+    console.log('Loading students...');
     this.http.get<any[]>('http://localhost:8080/api/students').subscribe({
-      next: (data) => this.students = data,
+      next: (data) => {
+        console.log('Students loaded:', data);
+        this.students = data;
+        this.cdr.detectChanges();
+      },
       error: (err) => console.error('Error loading students:', err)
     });
   }
 
   loadCourses() {
+    console.log('Loading courses...');
     this.http.get<any[]>('http://localhost:8080/api/courses').subscribe({
-      next: (data) => this.courses = data,
+      next: (data) => {
+        console.log('Courses loaded:', data);
+        this.courses = data;
+        this.cdr.detectChanges();
+      },
       error: (err) => console.error('Error loading courses:', err)
     });
   }
 
   loadEnrollments() {
+    console.log('Loading enrollments...');
     // Charger toutes les inscriptions
     this.enrollments = [];
     this.http.get<any[]>('http://localhost:8080/api/students').subscribe({
       next: (students) => {
+        console.log('Loading enrollments for students:', students);
         students.forEach(student => {
           this.http.get<any>(`http://localhost:8080/api/students/${student.id}/courses`).subscribe({
             next: (data) => {
@@ -331,6 +349,7 @@ export class EnrollmentsComponent implements OnInit {
                   enrollmentDate: student.enrollmentDate
                 });
               });
+              this.cdr.detectChanges();
             }
           });
         });
@@ -387,5 +406,9 @@ export class EnrollmentsComponent implements OnInit {
 
   formatDate(date: string): string {
     return new Date(date).toLocaleDateString('fr-FR');
+  }
+
+  canManageEnrollments(): boolean {
+    return this.authService.canManageEnrollments();
   }
 }

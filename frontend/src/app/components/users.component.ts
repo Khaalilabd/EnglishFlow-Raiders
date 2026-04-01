@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-users',
@@ -11,7 +12,7 @@ import { HttpClient } from '@angular/common/http';
     <div class="page">
       <div class="page-header">
         <h1>👥 Gestion des Utilisateurs</h1>
-        <button class="btn-primary" (click)="openModal()">+ Nouvel utilisateur</button>
+        <button *ngIf="canManageUsers()" class="btn-primary" (click)="openModal()">+ Nouvel utilisateur</button>
       </div>
       
       <div class="stats">
@@ -51,8 +52,8 @@ import { HttpClient } from '@angular/common/http';
               <td><span class="status" [class.active]="user.active">{{user.active ? 'Actif' : 'Inactif'}}</span></td>
               <td>{{formatDate(user.lastLogin)}}</td>
               <td>
-                <button class="btn-edit" (click)="editUser(user)">✏️</button>
-                <button class="btn-delete" (click)="deleteUser(user.id)">🗑️</button>
+                <button *ngIf="canManageUsers()" class="btn-edit" (click)="editUser(user)">✏️</button>
+                <button *ngIf="canManageUsers()" class="btn-delete" (click)="deleteUser(user.id)">🗑️</button>
               </td>
             </tr>
           </tbody>
@@ -156,15 +157,25 @@ export class UsersComponent implements OnInit {
   editMode = false;
   currentUser: any = {};
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
+    console.log('UsersComponent initialized');
     this.loadUsers();
   }
 
   loadUsers() {
+    console.log('Loading users...');
     this.http.get<any[]>('http://localhost:8080/api/auth/users').subscribe({
-      next: (data) => this.users = data,
+      next: (data) => {
+        console.log('Users loaded:', data);
+        this.users = data;
+        this.cdr.detectChanges();
+      },
       error: (err) => console.error('Error:', err)
     });
   }
@@ -226,5 +237,9 @@ export class UsersComponent implements OnInit {
 
   formatDate(date: string): string {
     return date ? new Date(date).toLocaleDateString('fr-FR') : 'Jamais';
+  }
+
+  canManageUsers(): boolean {
+    return this.authService.canManageUsers();
   }
 }

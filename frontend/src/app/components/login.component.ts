@@ -2,6 +2,7 @@ import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -27,31 +28,45 @@ import { HttpClient } from '@angular/common/http';
               <form (ngSubmit)="onRegister()" class="auth-form">
                 <div class="form-row">
                   <div class="form-group">
-                    <label for="firstName">Prénom</label>
+                    <label for="firstName">Prénom *</label>
                     <input 
                       type="text" 
                       id="firstName"
                       [(ngModel)]="registerData.firstName" 
                       name="firstName"
                       placeholder="Votre prénom"
+                      minlength="2"
+                      maxlength="50"
                       required
-                      [disabled]="loading">
+                      [disabled]="loading"
+                      #firstName="ngModel">
+                    <small class="field-hint">Minimum 2 caractères</small>
+                    @if (firstName.invalid && firstName.touched) {
+                      <small class="field-error">Le prénom est requis (min. 2 caractères)</small>
+                    }
                   </div>
                   <div class="form-group">
-                    <label for="lastName">Nom</label>
+                    <label for="lastName">Nom *</label>
                     <input 
                       type="text" 
                       id="lastName"
                       [(ngModel)]="registerData.lastName" 
                       name="lastName"
                       placeholder="Votre nom"
+                      minlength="2"
+                      maxlength="50"
                       required
-                      [disabled]="loading">
+                      [disabled]="loading"
+                      #lastName="ngModel">
+                    <small class="field-hint">Minimum 2 caractères</small>
+                    @if (lastName.invalid && lastName.touched) {
+                      <small class="field-error">Le nom est requis (min. 2 caractères)</small>
+                    }
                   </div>
                 </div>
 
                 <div class="form-group">
-                  <label for="regUsername">Nom d'utilisateur</label>
+                  <label for="regUsername">Nom d'utilisateur *</label>
                   <div class="input-wrapper">
                     <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -63,13 +78,31 @@ import { HttpClient } from '@angular/common/http';
                       [(ngModel)]="registerData.username" 
                       name="regUsername"
                       placeholder="Choisissez un nom d'utilisateur"
+                      minlength="3"
+                      maxlength="30"
+                      pattern="[a-zA-Z0-9_-]+"
                       required
-                      [disabled]="loading">
+                      [disabled]="loading"
+                      #regUsername="ngModel">
                   </div>
+                  <small class="field-hint">3-30 caractères (lettres, chiffres, _ et - uniquement)</small>
+                  @if (regUsername.invalid && regUsername.touched) {
+                    <small class="field-error">
+                      @if (regUsername.errors?.['required']) {
+                        Le nom d'utilisateur est requis
+                      }
+                      @if (regUsername.errors?.['minlength']) {
+                        Minimum 3 caractères
+                      }
+                      @if (regUsername.errors?.['pattern']) {
+                        Uniquement lettres, chiffres, _ et -
+                      }
+                    </small>
+                  }
                 </div>
 
                 <div class="form-group">
-                  <label for="email">Email</label>
+                  <label for="email">Email *</label>
                   <div class="input-wrapper">
                     <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
@@ -81,13 +114,26 @@ import { HttpClient } from '@angular/common/http';
                       [(ngModel)]="registerData.email" 
                       name="email"
                       placeholder="votre@email.com"
+                      pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
                       required
-                      [disabled]="loading">
+                      [disabled]="loading"
+                      #email="ngModel">
                   </div>
+                  <small class="field-hint">Format: exemple@domaine.com</small>
+                  @if (email.invalid && email.touched) {
+                    <small class="field-error">
+                      @if (email.errors?.['required']) {
+                        L'email est requis
+                      }
+                      @if (email.errors?.['pattern']) {
+                        Format d'email invalide
+                      }
+                    </small>
+                  }
                 </div>
 
                 <div class="form-group">
-                  <label for="regPassword">Mot de passe</label>
+                  <label for="regPassword">Mot de passe *</label>
                   <div class="input-wrapper">
                     <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
@@ -99,26 +145,48 @@ import { HttpClient } from '@angular/common/http';
                       [(ngModel)]="registerData.password" 
                       name="regPassword"
                       placeholder="Créez un mot de passe"
+                      minlength="8"
                       required
-                      [disabled]="loading">
+                      [disabled]="loading"
+                      #regPassword="ngModel">
+                  </div>
+                  <small class="field-hint">Minimum 8 caractères</small>
+                  @if (regPassword.invalid && regPassword.touched) {
+                    <small class="field-error">
+                      @if (regPassword.errors?.['required']) {
+                        Le mot de passe est requis
+                      }
+                      @if (regPassword.errors?.['minlength']) {
+                        Minimum 8 caractères requis
+                      }
+                    </small>
+                  }
+                  <div class="password-strength">
+                    <div class="strength-bar" [class.weak]="getPasswordStrength() === 'weak'" 
+                         [class.medium]="getPasswordStrength() === 'medium'"
+                         [class.strong]="getPasswordStrength() === 'strong'">
+                    </div>
+                    <small>Force: {{getPasswordStrengthLabel()}}</small>
                   </div>
                 </div>
 
                 <div class="form-group">
-                  <label for="role">Rôle</label>
+                  <label for="role">Rôle *</label>
                   <select 
                     id="role"
                     [(ngModel)]="registerData.role" 
                     name="role"
                     [disabled]="loading"
-                    class="select-input">
+                    class="select-input"
+                    required>
                     <option value="STUDENT">Étudiant</option>
                     <option value="TUTOR">Tuteur</option>
                     <option value="ADMIN">Administrateur</option>
                   </select>
+                  <small class="field-hint">Choisissez votre rôle dans la plateforme</small>
                 </div>
 
-                <button type="submit" class="btn-primary" [disabled]="loading">
+                <button type="submit" class="btn-primary" [disabled]="loading || !isRegisterFormValid()">
                   @if (!loading) {
                     <span>Créer mon compte</span>
                   } @else {
@@ -555,6 +623,53 @@ import { HttpClient } from '@angular/common/http';
       border: 1px solid #bbf7d0;
     }
 
+    .field-hint {
+      display: block;
+      font-size: 12px;
+      color: rgba(100, 116, 139, 0.8);
+      margin-top: 4px;
+    }
+
+    .field-error {
+      display: block;
+      font-size: 12px;
+      color: #dc2626;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .password-strength {
+      margin-top: 8px;
+    }
+
+    .strength-bar {
+      height: 4px;
+      border-radius: 2px;
+      background: #e5e7eb;
+      margin-bottom: 4px;
+      transition: all 0.3s;
+    }
+
+    .strength-bar.weak {
+      width: 33%;
+      background: #ef4444;
+    }
+
+    .strength-bar.medium {
+      width: 66%;
+      background: #f59e0b;
+    }
+
+    .strength-bar.strong {
+      width: 100%;
+      background: #10b981;
+    }
+
+    .password-strength small {
+      font-size: 12px;
+      color: rgba(100, 116, 139, 0.8);
+    }
+
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
       25% { transform: translateX(-8px); }
@@ -721,9 +836,27 @@ export class LoginComponent {
     role: 'STUDENT'
   };
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private http: HttpClient, 
+    private cdr: ChangeDetectorRef,
+    private router: Router
+  ) {
+    // Vérifier si déjà connecté
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      this.router.navigate(['/dashboard']);
+    }
+    
+    // Déterminer si on affiche le formulaire d'inscription
+    this.showRegister = this.router.url === '/register';
+  }
 
   toggleView() {
+    if (this.showRegister) {
+      this.router.navigate(['/login']);
+    } else {
+      this.router.navigate(['/register']);
+    }
     this.showRegister = !this.showRegister;
     this.error = '';
     this.successMessage = '';
@@ -753,15 +886,17 @@ export class LoginComponent {
       }).subscribe({
         next: (response) => {
           console.log('Login successful:', response);
-          localStorage.setItem('access_token', response.token);
-          localStorage.setItem('username', response.username);
-          localStorage.setItem('user_role', response.role);
-          localStorage.setItem('user_email', response.email);
-          localStorage.setItem('user_firstname', response.firstName || '');
-          localStorage.setItem('user_lastname', response.lastName || '');
+          localStorage.setItem('access_token', response.accessToken);
+          localStorage.setItem('refresh_token', response.refreshToken);
+          localStorage.setItem('user_id', response.user.id.toString());
+          localStorage.setItem('username', response.user.username);
+          localStorage.setItem('user_role', response.user.role);
+          localStorage.setItem('user_email', response.user.email);
+          localStorage.setItem('user_firstname', response.user.firstName || '');
+          localStorage.setItem('user_lastname', response.user.lastName || '');
           this.loading = false;
           this.cdr.detectChanges();
-          window.dispatchEvent(new CustomEvent('login-success'));
+          this.router.navigate(['/dashboard']);
         },
         error: (err) => {
           console.log('Login error received:', err);
@@ -806,29 +941,9 @@ export class LoginComponent {
   onRegister() {
     console.log('Register attempt started');
     
-    if (!this.registerData.username || !this.registerData.email || 
-        !this.registerData.password || !this.registerData.firstName || 
-        !this.registerData.lastName) {
-      this.error = 'Veuillez remplir tous les champs';
-      this.cdr.detectChanges();
-      return;
-    }
-
-    if (this.registerData.username.length < 3) {
-      this.error = 'Le nom d\'utilisateur doit contenir au moins 3 caractères';
-      this.cdr.detectChanges();
-      return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(this.registerData.email)) {
-      this.error = 'Format d\'email invalide';
-      this.cdr.detectChanges();
-      return;
-    }
-
-    if (this.registerData.password.length < 6) {
-      this.error = 'Le mot de passe doit contenir au moins 6 caractères';
+    // Validation côté client
+    if (!this.isRegisterFormValid()) {
+      this.error = 'Veuillez remplir correctement tous les champs requis';
       this.cdr.detectChanges();
       return;
     }
@@ -872,7 +987,11 @@ export class LoginComponent {
         if (err.status === 0) {
           this.error = 'Impossible de se connecter au serveur. Vérifiez que les services sont démarrés.';
         } else if (err.status === 400) {
-          this.error = err.error?.message || 'Données invalides. Vérifiez vos informations.';
+          // Afficher le message d'erreur détaillé du backend
+          const errorMsg = err.error?.error || err.error?.message || 'Données invalides';
+          this.error = `Erreur: ${errorMsg}. Vérifiez que Keycloak est configuré correctement.`;
+        } else if (err.status === 401) {
+          this.error = 'Erreur d\'authentification avec Keycloak. Contactez l\'administrateur.';
         } else if (err.status === 409) {
           this.error = err.error?.message || 'Ce nom d\'utilisateur ou email existe déjà';
         } else {
@@ -883,6 +1002,48 @@ export class LoginComponent {
         console.log('Error message set to:', this.error);
       }
     });
+  }
+
+  isRegisterFormValid(): boolean {
+    return !!(
+      this.registerData.firstName && this.registerData.firstName.length >= 2 &&
+      this.registerData.lastName && this.registerData.lastName.length >= 2 &&
+      this.registerData.username && this.registerData.username.length >= 3 &&
+      this.registerData.email && this.isValidEmail(this.registerData.email) &&
+      this.registerData.password && this.registerData.password.length >= 8 &&
+      this.registerData.role
+    );
+  }
+
+  isValidEmail(email: string): boolean {
+    const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
+    return emailRegex.test(email);
+  }
+
+  getPasswordStrength(): string {
+    const password = this.registerData.password;
+    if (!password || password.length < 6) return 'weak';
+    
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (password.length >= 12) strength++;
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+    if (/\d/.test(password)) strength++;
+    if (/[^a-zA-Z0-9]/.test(password)) strength++;
+    
+    if (strength <= 2) return 'weak';
+    if (strength <= 4) return 'medium';
+    return 'strong';
+  }
+
+  getPasswordStrengthLabel(): string {
+    const strength = this.getPasswordStrength();
+    switch(strength) {
+      case 'weak': return 'Faible';
+      case 'medium': return 'Moyen';
+      case 'strong': return 'Fort';
+      default: return '';
+    }
   }
 
   onForgotPassword() {

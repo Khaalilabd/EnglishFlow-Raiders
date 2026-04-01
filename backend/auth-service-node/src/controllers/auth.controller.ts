@@ -10,6 +10,9 @@ export const register = async (req: Request, res: Response) => {
   try {
     const { email, username, password, firstName, lastName } = req.body;
 
+    console.log('Registration request received for:', username);
+
+    // Créer l'utilisateur dans Keycloak
     const keycloakUser = await keycloakService.createUser({
       email,
       username,
@@ -18,23 +21,24 @@ export const register = async (req: Request, res: Response) => {
       lastName,
     });
 
+    console.log('User created in Keycloak with ID:', keycloakUser.id);
+
+    // Créer l'utilisateur dans notre base de données
     const user = await prisma.user.create({
       data: {
         email,
         username,
         keycloakId: keycloakUser.id,
+        firstName,
+        lastName,
       },
     });
 
-    await studentService.createStudent({
-      userId: user.id,
-      email,
-      firstName,
-      lastName,
-    });
+    console.log('User created in database with ID:', user.id);
 
     res.status(201).json({ message: 'User registered successfully', userId: user.id });
   } catch (error: any) {
+    console.error('Registration error:', error.message);
     res.status(400).json({ error: error.message });
   }
 };
@@ -116,5 +120,77 @@ export const validate = async (req: Request, res: Response) => {
     res.json({ valid: isValid });
   } catch (error: any) {
     res.status(401).json({ error: 'Invalid token' });
+  }
+};
+
+export const getAllUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    res.json(users);
+  } catch (error: any) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+};
+
+export const approveStudent = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+    // Récupérer l'utilisateur
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Vérifier si l'étudiant existe déjà dans le student-service
+    try {
+      const existingStudents = await studentService.getStudentByEmail(user.email);
+      if (existingStudents) {
+        return res.status(400).json({ error: 'Student already approved' });
+      }
+    } catch (checkError) {
+      // L'étudiant n'existe pas, on peut continuer
+    }
+
+    // Créer le profil étudiant dans le student-service
+    try {
+      await studentService.createStudent({
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      });
+
+      res.json({ message: 'Student approved successfully' });
+    } catch (studentError: any) {
+      console.error('Failed to create student profile:', studentError);
+      
+      // Vérifier si c'est une erreur de duplication
+      if (studentError.response?.status === 409 || studentError.message?.includes('duplicate')) {
+        return res.status(400).json({ error: 'Student already exists' });
+      }
+      
+      res.status(500).json({ error: 'Failed to create student profile: ' + studentError.message });
+    }
+  } catch (error: any) {
+    console.error('Error approving student:', error);
+    res.status(500).json({ error: 'Failed to approve student: ' + error.message });
   }
 };

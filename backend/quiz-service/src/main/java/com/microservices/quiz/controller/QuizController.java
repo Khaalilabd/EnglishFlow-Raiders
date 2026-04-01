@@ -20,6 +20,9 @@ public class QuizController {
     
     @Autowired
     private QuestionRepository questionRepository;
+    
+    @Autowired
+    private com.microservices.quiz.service.QuizAttemptService quizAttemptService;
 
     @GetMapping
     public List<Quiz> getAllQuizzes() {
@@ -43,10 +46,37 @@ public class QuizController {
         return quizRepository.save(quiz);
     }
 
+    @GetMapping("/{quizId}/questions")
+    public List<Question> getQuizQuestions(@PathVariable Long quizId) {
+        return questionRepository.findByQuizId(quizId);
+    }
+
     @PostMapping("/{quizId}/questions")
     public Question addQuestion(@PathVariable Long quizId, @RequestBody Question question) {
         question.setQuizId(quizId);
         return questionRepository.save(question);
+    }
+    
+    @PutMapping("/questions/{id}")
+    public ResponseEntity<Question> updateQuestion(@PathVariable Long id, @RequestBody Question questionDetails) {
+        return questionRepository.findById(id)
+                .map(question -> {
+                    question.setQuestionText(questionDetails.getQuestionText());
+                    question.setOptions(questionDetails.getOptions());
+                    question.setCorrectAnswer(questionDetails.getCorrectAnswer());
+                    return ResponseEntity.ok(questionRepository.save(question));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+    
+    @DeleteMapping("/questions/{id}")
+    public ResponseEntity<Void> deleteQuestion(@PathVariable Long id) {
+        return questionRepository.findById(id)
+                .map(question -> {
+                    questionRepository.delete(question);
+                    return ResponseEntity.ok().<Void>build();
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
     
     @PutMapping("/{id}")
@@ -73,5 +103,34 @@ public class QuizController {
                     return ResponseEntity.ok().<Void>build();
                 })
                 .orElse(ResponseEntity.notFound().build());
+    }
+    
+    // Endpoints pour passer les quiz
+    @PostMapping("/submit")
+    public ResponseEntity<com.microservices.quiz.dto.QuizResultDTO> submitQuiz(
+            @RequestBody com.microservices.quiz.dto.QuizSubmissionDTO submission) {
+        try {
+            com.microservices.quiz.dto.QuizResultDTO result = quizAttemptService.submitQuiz(submission);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    @GetMapping("/attempts/student/{studentId}")
+    public List<com.microservices.quiz.entity.QuizAttempt> getStudentAttempts(@PathVariable Long studentId) {
+        return quizAttemptService.getStudentAttempts(studentId);
+    }
+    
+    @GetMapping("/{quizId}/attempts")
+    public List<com.microservices.quiz.entity.QuizAttempt> getQuizAttempts(@PathVariable Long quizId) {
+        return quizAttemptService.getQuizAttempts(quizId);
+    }
+    
+    @GetMapping("/{quizId}/attempts/student/{studentId}")
+    public List<com.microservices.quiz.entity.QuizAttempt> getStudentQuizAttempts(
+            @PathVariable Long quizId,
+            @PathVariable Long studentId) {
+        return quizAttemptService.getStudentQuizAttempts(studentId, quizId);
     }
 }

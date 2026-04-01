@@ -20,12 +20,11 @@ public class Question {
     @Column(length = 500)
     private String questionText;
     
-    private String option1;
-    private String option2;
-    private String option3;
-    private String option4;
+    @Column(length = 1000)
+    private String options; // Format: "Option A,Option B,Option C,Option D"
     
-    private Integer correctOption;
+    @Column(length = 500)
+    private String correctAnswer; // La réponse correcte exacte
     
     private Integer points;
 }

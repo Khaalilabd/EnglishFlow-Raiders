@@ -14,34 +14,58 @@ export class KeycloakService {
   }
 
   async createUser(userData: any) {
-    const adminToken = await this.getAdminToken();
+    try {
+      console.log('Creating user in Keycloak...');
+      console.log('Keycloak URL:', this.baseUrl);
+      console.log('Realm:', this.realm);
+      
+      // Obtenir un token admin depuis le realm microservices
+      const adminToken = await this.getAdminToken();
+      console.log('Admin token obtained successfully');
 
-    const response = await axios.post(
-      `${this.baseUrl}/admin/realms/${this.realm}/users`,
-      {
-        username: userData.username,
-        email: userData.email,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        enabled: true,
-        credentials: [
-          {
-            type: 'password',
-            value: userData.password,
-            temporary: false,
-          },
-        ],
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${adminToken}`,
-          'Content-Type': 'application/json',
+      const keycloakUrl = `${this.baseUrl}/admin/realms/${this.realm}/users`;
+      console.log('Creating user at:', keycloakUrl);
+
+      const response = await axios.post(
+        keycloakUrl,
+        {
+          username: userData.username,
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          enabled: true,
+          emailVerified: true,
+          credentials: [
+            {
+              type: 'password',
+              value: userData.password,
+              temporary: false,
+            },
+          ],
         },
-      }
-    );
+        {
+          headers: {
+            Authorization: `Bearer ${adminToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-    const userId = response.headers.location?.split('/').pop();
-    return { id: userId };
+      console.log('User created in Keycloak, status:', response.status);
+
+      // Extraire l'ID utilisateur de l'URL de location
+      const locationHeader = response.headers.location || response.headers.Location;
+      const userId = locationHeader?.split('/').pop();
+      
+      console.log('Keycloak user ID:', userId);
+      return { id: userId };
+    } catch (error: any) {
+      console.error('Keycloak createUser error details:');
+      console.error('Status:', error.response?.status);
+      console.error('Data:', error.response?.data);
+      console.error('Message:', error.message);
+      throw new Error(error.response?.data?.errorMessage || error.message || 'Failed to create user in Keycloak');
+    }
   }
 
   async login(username: string, password: string) {
@@ -161,20 +185,48 @@ export class KeycloakService {
   }
 
   private async getAdminToken(): Promise<string> {
-    const response = await axios.post(
-      `${this.baseUrl}/realms/master/protocol/openid-connect/token`,
-      new URLSearchParams({
-        grant_type: 'client_credentials',
-        client_id: this.clientId,
-        client_secret: this.clientSecret,
-      }),
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      }
-    );
+    try {
+      // Option 1: Essayer avec le client actuel (si configuré avec service account)
+      const response = await axios.post(
+        `${this.baseUrl}/realms/${this.realm}/protocol/openid-connect/token`,
+        new URLSearchParams({
+          grant_type: 'client_credentials',
+          client_id: this.clientId,
+          client_secret: this.clientSecret,
+        }),
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }
+      );
 
-    return response.data.access_token;
+      return response.data.access_token;
+    } catch (error: any) {
+      console.error('Failed to get admin token with client_credentials:', error.response?.data || error.message);
+      
+      // Option 2: Essayer avec le realm master (fallback)
+      try {
+        const response = await axios.post(
+          `${this.baseUrl}/realms/master/protocol/openid-connect/token`,
+          new URLSearchParams({
+            grant_type: 'password',
+            client_id: 'admin-cli',
+            username: process.env.KEYCLOAK_ADMIN_USERNAME || 'admin',
+            password: process.env.KEYCLOAK_ADMIN_PASSWORD || 'admin',
+          }),
+          {
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+          }
+        );
+
+        return response.data.access_token;
+      } catch (masterError: any) {
+        console.error('Failed to get admin token from master realm:', masterError.response?.data || masterError.message);
+        throw new Error('Unable to obtain admin token. Please configure Keycloak admin credentials.');
+      }
+    }
   }
 }

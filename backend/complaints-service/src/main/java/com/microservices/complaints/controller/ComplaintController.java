@@ -66,4 +66,25 @@ public class ComplaintController {
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
+    
+    @PatchMapping("/{id}/resolve")
+    public ResponseEntity<Complaint> resolveComplaint(
+            @PathVariable Long id, 
+            @RequestBody com.microservices.complaints.dto.ComplaintResolutionDTO resolution) {
+        return complaintRepository.findById(id)
+                .map(complaint -> {
+                    complaint.setStatus(resolution.getStatus());
+                    complaint.setResponse(resolution.getResponse());
+                    complaint.setHandledBy(resolution.getHandledBy());
+                    complaint.setHandledByUserId(resolution.getHandledByUserId());
+                    
+                    // Si résolu ou fermé, enregistrer la date
+                    if ("RESOLVED".equals(resolution.getStatus()) || "CLOSED".equals(resolution.getStatus())) {
+                        complaint.setResolvedAt(java.time.LocalDateTime.now());
+                    }
+                    
+                    return ResponseEntity.ok(complaintRepository.save(complaint));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
 }
