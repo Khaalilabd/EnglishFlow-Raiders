@@ -1,0 +1,74 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/**
+            
+        - id: courses-service
+          uri: lb://courses-service
+          predicates:
+            - Path=/api/courses/**
+          filters:
+            - StripPrefix=1
+            - name: CircuitBreaker
+              args:
+                name: coursesCircuitBreaker
+                fallbackUri: forward:/fallback/courses
+            
+        - id: students-service
+          uri: lb://students-service
+          predicates:
+            - Path=/api/students/**
+          filters:
+            - StripPrefix=1
+            - name: CircuitBreaker
+              args:
+                name: studentsCircuitBreaker
+                fallbackUri: forward:/fallback/students
+        
+        - id: enrollments-service
+          uri: lb://students-service
+          predicates:
+            - Path=/api/enrollments/**
+          filters:
+            - StripPrefix=1
+            - RewritePath=/enrollments, /students/enrollments
+            
+        - id: complaints-service
+          uri: lb://complaints-service
+          predicates:
+            - Path=/api/complaints/**
+            
+        - id: clubs-service
+          uri: lb://clubs-service
+          predicates:
+            - Path=/api/clubs/**
+            
+        - id: quiz-service
+          uri: lb://quiz-service
+          predicates:
+            - Path=/api/quizzes/**
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins: "http://localhost:4200"
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            allowed-headers: "*"
+            allow-credentials: true
+            max-age: 3600

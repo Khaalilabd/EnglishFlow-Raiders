@@ -125,7 +125,85 @@ export const validate = async (req: Request, res: Response) => {
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
+    const { 
+      search, 
+      role, 
+      isActive, 
+      sortBy = 'createdAt', 
+      sortOrder = 'desc',
+      page,
+      limit
+    } = req.query;
+
+    // Construire les conditions de filtrage
+    const where: any = {};
+
+    // Recherche par nom, email ou username
+    if (search && typeof search === 'string') {
+      where.OR = [
+        { username: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+        { firstName: { contains: search, mode: 'insensitive' } },
+        { lastName: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    // Filtre par rôle
+    if (role && typeof role === 'string') {
+      where.role = role;
+    }
+
+    // Filtre par statut actif/inactif
+    if (isActive !== undefined) {
+      where.isActive = isActive === 'true';
+    }
+
+    // Tri
+    const orderBy: any = {};
+    orderBy[sortBy as string] = sortOrder === 'asc' ? 'asc' : 'desc';
+
+    // Si pagination demandée
+    if (page && limit) {
+      const pageNum = parseInt(page as string);
+      const limitNum = parseInt(limit as string);
+      const skip = (pageNum - 1) * limitNum;
+
+      const [users, total] = await Promise.all([
+        prisma.user.findMany({
+          where,
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            role: true,
+            isActive: true,
+            keycloakId: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+          orderBy,
+          skip,
+          take: limitNum,
+        }),
+        prisma.user.count({ where }),
+      ]);
+
+      return res.json({
+        users,
+        pagination: {
+          total,
+          page: pageNum,
+          limit: limitNum,
+          totalPages: Math.ceil(total / limitNum),
+        },
+      });
+    }
+
+    // Sans pagination (rétrocompatibilité)
     const users = await prisma.user.findMany({
+      where,
       select: {
         id: true,
         username: true,
@@ -133,17 +211,83 @@ export const getAllUsers = async (req: Request, res: Response) => {
         firstName: true,
         lastName: true,
         role: true,
+        isActive: true,
+        keycloakId: true,
         createdAt: true,
+        updatedAt: true,
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
+      orderBy,
     });
 
     res.json(users);
   } catch (error: any) {
     console.error('Error fetching users:', error);
     res.status(500).json({ error: 'Failed to fetch users' });
+  }
+};
+
+export const getUserById = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        isActive: true,
+        keycloakId: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json(user);
+  } catch (error: any) {
+    console.error('Error fetching user:', error);
+    res.status(500).json({ error: 'Failed to fetch user' });
+  }
+};
+
+export const getUserStats = async (req: Request, res: Response) => {
+  try {
+    const [
+      totalUsers,
+      activeUsers,
+      inactiveUsers,
+      studentCount,
+      tutorCount,
+      adminCount,
+    ] = await Promise.all([
+      prisma.user.count(),
+      prisma.user.count({ where: { isActive: true } }),
+      prisma.user.count({ where: { isActive: false } }),
+      prisma.user.count({ where: { role: 'STUDENT' } }),
+      prisma.user.count({ where: { role: 'TUTOR' } }),
+      prisma.user.count({ where: { role: 'ADMIN' } }),
+    ]);
+
+    res.json({
+      total: totalUsers,
+      active: activeUsers,
+      inactive: inactiveUsers,
+      byRole: {
+        STUDENT: studentCount,
+        TUTOR: tutorCount,
+        ADMIN: adminCount,
+      },
+    });
+  } catch (error: any) {
+    console.error('Error fetching user stats:', error);
+    res.status(500).json({ error: 'Failed to fetch user statistics' });
   }
 };
 
@@ -192,5 +336,55 @@ export const approveStudent = async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('Error approving student:', error);
     res.status(500).json({ error: 'Failed to approve student: ' + error.message });
+  }
+};
+
+export const updateUser = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const { isActive, role } = req.body;
+
+    // Récupérer l'utilisateur
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Mettre à jour dans PostgreSQL
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(isActive !== undefined && { isActive }),
+        ...(role && { role }),
+      },
+    });
+
+    // Mettre à jour dans Keycloak si nécessaire
+    if (user.keycloakId && isActive !== undefined) {
+      try {
+        await keycloakService.updateUserStatus(user.keycloakId, isActive);
+      } catch (keycloakError) {
+        console.error('Failed to update user in Keycloak:', keycloakError);
+      }
+    }
+
+    res.json({
+      message: 'User updated successfully',
+      user: {
+        id: updatedUser.id,
+        username: updatedUser.username,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        isActive: updatedUser.isActive,
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+      },
+    });
+  } catch (error: any) {
+    console.error('Error updating user:', error);
+    res.status(500).json({ error: 'Failed to update user: ' + error.message });
   }
 };

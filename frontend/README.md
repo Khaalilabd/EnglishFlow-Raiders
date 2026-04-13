@@ -1,59 +1,178 @@
-# Frontend
+# 🎨 Frontend Angular
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.4.
+## 📋 Description
+Application frontend Angular moderne avec Nginx pour l'architecture microservices.
 
-## Development server
+## 🚀 Fonctionnalités
+- ✅ Interface utilisateur moderne et responsive
+- ✅ Authentification avec Keycloak
+- ✅ Dashboard avec statistiques
+- ✅ CRUD Courses
+- ✅ CRUD Students
+- ✅ CRUD Clubs
+- ✅ CRUD Quiz
+- ✅ Gestion des réclamations
+- ✅ Charts et graphiques (Chart.js)
+- ✅ Routing Angular
+- ✅ Standalone Components
 
-To start a local development server, run:
+## 🔌 Port
+- **4200** (dev) - Angular Dev Server
+- **80** (prod) - Nginx
 
+## 📦 Technologies
+- Angular 21
+- TypeScript 5.9
+- Chart.js 4.5
+- RxJS 7.8
+- Nginx 1.25 (production)
+
+## 🌐 Pages
+
+### Public
+- `/login` - Authentification
+
+### Protected
+- `/dashboard` - Vue d'ensemble
+- `/courses` - Gestion des cours
+- `/students` - Gestion des étudiants
+- `/clubs` - Gestion des clubs
+- `/quiz` - Gestion des quiz
+- `/complaints` - Réclamations
+
+## 🚀 Démarrage
+
+### Development
 ```bash
+# Installer les dépendances
+npm install
+
+# Démarrer le serveur de développement
+npm start
+# ou
 ng serve
+
+# Accéder à l'application
+http://localhost:4200
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
+### Build Production
 ```bash
-ng generate component component-name
+# Build pour production
+npm run build
+
+# Les fichiers sont dans dist/frontend/browser/
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
+### Tests
 ```bash
-ng generate --help
+# Lancer les tests
+npm test
 ```
 
-## Building
+## 🐳 Docker
 
-To build the project run:
-
+### Build
 ```bash
-ng build
+docker build -t frontend:latest .
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
+### Run
 ```bash
-ng test
+docker run -p 4200:80 frontend:latest
 ```
 
-## Running end-to-end tests
+## 🔧 Configuration
 
-For end-to-end (e2e) testing, run:
+### API Gateway URL
+Par défaut, le frontend communique avec l'API Gateway sur:
+```
+http://localhost:8080
+```
 
+### Environment
+Modifier `src/environments/environment.ts`:
+```typescript
+export const environment = {
+  production: false,
+  apiUrl: 'http://localhost:8080/api'
+};
+```
+
+## 📱 Design Features
+- ✨ Gradients modernes
+- 🎭 Animations fluides
+- 📱 Design responsive
+- 🎨 Palette de couleurs cohérente
+- 💫 Effets hover et transitions
+- 📊 Cartes statistiques animées
+
+## 🔐 Authentification
+- Login via Keycloak
+- JWT tokens stockés en localStorage
+- Auto-refresh des tokens
+- Logout automatique si token expiré
+
+## 📊 Structure
+```
+frontend/
+├── src/
+│   ├── app/
+│   │   ├── components/     # Composants réutilisables
+│   │   ├── pages/          # Pages de l'application
+│   │   ├── services/       # Services Angular
+│   │   └── models/         # Modèles TypeScript
+│   ├── assets/             # Images, styles
+│   └── environments/       # Configuration environnement
+├── nginx.conf              # Configuration Nginx
+└── Dockerfile              # Multi-stage build
+```
+
+## 🌐 API Endpoints Utilisés
+```typescript
+// Auth
+POST /api/auth/login
+POST /api/auth/register
+
+// Courses
+GET /api/courses
+POST /api/courses
+PUT /api/courses/{id}
+DELETE /api/courses/{id}
+
+// Students
+GET /api/students
+GET /api/students/{id}/courses
+POST /api/students
+PUT /api/students/{id}
+DELETE /api/students/{id}
+
+// Clubs
+GET /api/clubs
+POST /api/clubs
+POST /api/clubs/{id}/join
+
+// Quiz
+GET /api/quiz
+POST /api/quiz
+POST /api/quiz/{id}/submit
+
+// Complaints
+GET /api/complaints
+POST /api/complaints
+```
+
+## 🐛 Troubleshooting
+
+### CORS Errors
+Vérifier que l'API Gateway autorise `http://localhost:4200`
+
+### API Connection Failed
+Vérifier que l'API Gateway est démarré sur le port 8080
+
+### Build Errors
 ```bash
-ng e2e
+# Nettoyer et réinstaller
+rm -rf node_modules package-lock.json
+npm install
 ```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

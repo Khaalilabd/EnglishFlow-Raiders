@@ -4,8 +4,8 @@ import { Eureka } from 'eureka-js-client';
 const client = new Eureka({
   instance: {
     app: 'auth-service',
-    hostName: 'localhost',
-    ipAddr: '127.0.0.1',
+    hostName: process.env.HOSTNAME || 'auth-service-node',
+    ipAddr: process.env.HOSTNAME || 'auth-service-node',
     port: {
       '$': parseInt(process.env.PORT || '3001'),
       '@enabled': true,

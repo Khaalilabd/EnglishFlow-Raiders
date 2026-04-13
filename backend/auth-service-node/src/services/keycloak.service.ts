@@ -229,4 +229,26 @@ export class KeycloakService {
       }
     }
   }
+
+  async updateUserStatus(keycloakId: string, isActive: boolean): Promise<void> {
+    try {
+      const adminToken = await this.getAdminToken();
+      
+      await axios.put(
+        `${this.baseUrl}/admin/realms/${this.realm}/users/${keycloakId}`,
+        {
+          enabled: isActive,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${adminToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+    } catch (error: any) {
+      console.error('Failed to update user status in Keycloak:', error.response?.data || error.message);
+      throw new Error('Failed to update user status in Keycloak');
+    }
+  }
 }

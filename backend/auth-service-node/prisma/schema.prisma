@@ -13,6 +13,7 @@ model User {
   username   String   @unique
   keycloakId String?  @unique
   role       String   @default("STUDENT")
+  isActive   Boolean  @default(true)
   firstName  String?
   lastName   String?
   createdAt  DateTime @default(now())

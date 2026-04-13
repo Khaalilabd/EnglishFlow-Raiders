@@ -1,7 +1,7 @@
 # 🎯 Microservices Demo - Architecture Complète
 
 ## 📋 Description
-Projet de démonstration d'une architecture microservices complète avec Spring Boot, Eureka, API Gateway, OpenFeign et Keycloak.
+Architecture microservices complète avec Spring Boot, Eureka, API Gateway, Config Server, OpenFeign et Keycloak.
 
 ## 🏗️ Architecture
 
@@ -17,266 +17,295 @@ Projet de démonstration d'une architecture microservices complète avec Spring 
 │              Point d'entrée unique                           │
 └──────────────────────┬──────────────────────────────────────┘
                        │
-                       ▼
-┌─────────────────────────────────────────────────────────────┐
-│                  Eureka Server (8761)                        │
-│              Service Discovery                               │
-└──────────────────────┬──────────────────────────────────────┘
+        ┌──────────────┼──────────────┬──────────────┐
+        ▼              ▼               ▼              ▼
+┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+│Config Server │ │Eureka Server │ │  Keycloak    │ │  Databases   │
+│   (8888)     │ │   (8761)     │ │   (9090)     │ │ PG + MySQL   │
+└──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘
                        │
-        ┌──────────────┼──────────────┐
-        ▼              ▼               ▼
-┌──────────────┐ ┌──────────────┐ ┌──────────────┐
-│ Auth Service │ │Courses Service│ │Student Service│
-│   (8081)     │ │    (8082)     │ │    (8083)     │
-│              │ │               │ │               │
-│  Keycloak    │ │  PostgreSQL   │ │  PostgreSQL   │
-│   OAuth2     │ │  courses_db   │ │  students_db  │
-└──────────────┘ └──────────────┘ └───────┬────────┘
-                                           │
-                                           │ OpenFeign
-                                           ▼
-                                   ┌──────────────┐
-                                   │Courses Service│
-                                   └──────────────┘
+        ┌──────────────┼──────────────┬──────────────┐
+        ▼              ▼               ▼              ▼
+┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+│ Auth Service │ │Courses Service│ │Student Service│ │ Clubs Service│
+│   (8081)     │ │    (8082)     │ │    (8083)     │ │    (8085)    │
+└──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘
 ```
 
-## 🚀 Technologies Utilisées
+## 🚀 Technologies
 
 ### Backend
 - **Spring Boot 3.2.0**
 - **Spring Cloud 2023.0.0**
+- **Config Server** - Configuration centralisée
 - **Eureka Server** - Service Discovery
-- **Spring Cloud Gateway** - API Gateway
+- **API Gateway** - Point d'entrée unique
 - **OpenFeign** - Communication inter-services
-- **Keycloak** - Authentification OAuth2/JWT
-- **PostgreSQL** - Base de données
+- **Keycloak** - OAuth2/JWT
+- **Swagger/OpenAPI** - Documentation API
+- **Spring Security** - Sécurité
+- **PostgreSQL & MySQL** - Bases de données
 - **Docker** - Conteneurisation
 
 ### Frontend
-- **Angular 17** - Framework frontend
-- **Standalone Components** - Architecture moderne
-- **HttpClient** - Communication avec l'API
-- **CSS3** - Styling moderne avec gradients et animations
+- **Angular 21** - Framework moderne
+- **Nginx** - Serveur web
+- **Chart.js** - Graphiques
 
 ## 📦 Prérequis
 
-- Java 17+
-- Maven 3.8+
-- Node.js 18+
-- PostgreSQL 15+
-- Docker & Docker Compose
+- Docker Desktop installé
+- SSD externe configuré pour Docker (voir section Configuration)
+- 8GB RAM minimum
+- Ports disponibles: 3001, 4200, 5432, 3306, 8080-8086, 8761, 8888, 9090
 
-## 🔧 Installation et Démarrage
+## 🚀 Démarrage Rapide
 
-### 1. Démarrer les services Docker (PostgreSQL + Keycloak)
+### 1. Configurer Docker sur SSD Externe
 
+**Via Docker Desktop** :
+1. Ouvrir Docker Desktop
+2. Settings → Resources → Advanced
+3. Disk image location → `/Volumes/ADATA SC740/Docker`
+4. Apply & Restart
+
+### 2. Créer le fichier .env
 ```bash
-cd docker
-docker compose up -d
+cp .env.example .env
 ```
 
-Cela démarre:
-- PostgreSQL sur le port 5432
-- Keycloak sur le port 9090
+### 3. Démarrer tous les services
+```bash
+docker-compose up -d --build
+```
 
-### 2. Configurer Keycloak
+### 4. Vérifier le statut
+```bash
+docker-compose ps
+```
 
+### 5. Voir les logs
+```bash
+docker-compose logs -f
+```
+
+## 🌐 URLs d'Accès
+
+| Service | URL | Credentials |
+|---------|-----|-------------|
+| **Frontend** | http://localhost:4200 | - |
+| **API Gateway** | http://localhost:8080 | - |
+| **Eureka Dashboard** | http://localhost:8761 | - |
+| **Config Server** | http://localhost:8888 | configuser / configpass |
+| **Keycloak Admin** | http://localhost:9090 | admin / admin |
+| **Prometheus** | http://localhost:9091 | - |
+| **Grafana** | http://localhost:3000 | admin / admin |
+| **Zipkin** | http://localhost:9411 | - |
+| **Courses Swagger** | http://localhost:8082/swagger-ui.html | - |
+| **Students Swagger** | http://localhost:8083/swagger-ui.html | - |
+
+## 📚 Services
+
+### Infrastructure
+- **Config Server (8888)** - Configuration centralisée
+- **Eureka Server (8761)** - Service Discovery
+- **API Gateway (8080)** - Routage et load balancing
+
+### Business Services
+- **Auth Service (8081)** - Authentification Java
+- **Auth Service Node (3001)** - Authentification Node.js
+- **Courses Service (8082)** - Gestion des cours
+- **Student Service (8083)** - Gestion des étudiants
+- **Complaints Service (8084)** - Gestion des réclamations
+- **Clubs Service (8085)** - Gestion des clubs
+- **Quiz Service (8086)** - Gestion des quiz
+
+### Frontend
+- **Angular App (4200)** - Interface utilisateur
+
+## 🔐 Sécurité
+
+### Keycloak Configuration
 1. Accéder à http://localhost:9090
-2. Se connecter avec admin/admin
+2. Login: admin / admin
 3. Créer un realm: `microservices`
 4. Créer un client: `microservices-client`
-   - Client authentication: ON
-   - Valid redirect URIs: `*`
 5. Créer un utilisateur: `demo` / `demo123`
 
-### 3. Créer les bases de données
+### CORS
+Configuré pour:
+- http://localhost:4200 (Frontend)
+- http://localhost:8080 (API Gateway)
 
-```sql
-CREATE DATABASE courses_db;
-CREATE DATABASE students_db;
-```
+### Spring Security
+- Tous les services ont Spring Security activé
+- Endpoints Swagger et Actuator publics
+- Autres endpoints nécessitent authentification
 
-### 4. Démarrer les services backend (dans l'ordre)
+## 📊 Monitoring & Health Checks
 
+### Health Checks
+Tous les services exposent `/actuator/health`:
 ```bash
-# 1. Eureka Server
-cd eureka-server
-mvn spring-boot:run
-
-# 2. API Gateway
-cd api-gateway
-mvn spring-boot:run
-
-# 3. Auth Service
-cd auth-service
-mvn spring-boot:run
-
-# 4. Courses Service
-cd courses-service
-mvn spring-boot:run
-
-# 5. Student Service
-cd student-service
-mvn spring-boot:run
+curl http://localhost:8082/actuator/health
 ```
 
-### 5. Démarrer le frontend
-
+### Metrics
 ```bash
-cd frontend
-npm install
-ng serve
+curl http://localhost:8082/actuator/metrics
 ```
 
-## 🌐 URLs d'accès
-
-| Service | URL | Description |
-|---------|-----|-------------|
-| Frontend | http://localhost:4200 | Interface utilisateur |
-| API Gateway | http://localhost:8080 | Point d'entrée API |
-| Eureka Server | http://localhost:8761 | Dashboard Eureka |
-| Keycloak | http://localhost:9090 | Console Keycloak |
-| Auth Service | http://localhost:8081 | Service d'authentification |
-| Courses Service | http://localhost:8082 | Service des cours |
-| Student Service | http://localhost:8083 | Service des étudiants |
-
-## 🔑 Identifiants de test
-
-### Application
-- **Username:** demo
-- **Password:** demo123
-
-### Keycloak Admin
-- **Username:** admin
-- **Password:** admin
-
-### PostgreSQL
-- **Username:** postgres
-- **Password:** postgres
-
-## 📚 Fonctionnalités Démontrées
-
-### ✅ 1. Service Discovery avec Eureka
-Tous les services s'enregistrent automatiquement sur Eureka Server. Vérifiable sur http://localhost:8761
-
-### ✅ 2. API Gateway comme point d'entrée unique
-Toutes les requêtes passent par le Gateway sur le port 8080:
-- `/api/auth/**` → Auth Service
-- `/api/courses/**` → Courses Service
-- `/api/students/**` → Student Service
-
-### ✅ 3. Communication OpenFeign
-Le Student Service communique avec le Courses Service via OpenFeign pour récupérer les cours d'un étudiant.
-
-**Endpoint de démonstration:**
+### Eureka Dashboard
+Voir tous les services enregistrés:
 ```
-GET http://localhost:8080/api/students/{id}/courses
+http://localhost:8761
 ```
 
-Cette requête:
-1. Arrive au Student Service via le Gateway
-2. Le Student Service utilise OpenFeign pour appeler le Courses Service
-3. Les données sont combinées et retournées
+## 📖 Documentation API (Swagger)
 
-### ✅ 4. Authentification Keycloak
-- Login avec OAuth2/JWT
-- Tokens d'accès et de rafraîchissement
-- Intégration complète avec le frontend
-
-## 🎨 Interface Frontend
-
-### Pages disponibles:
-1. **Login** - Authentification avec Keycloak
-2. **Dashboard** - Vue d'ensemble avec statistiques et architecture
-3. **Courses** - CRUD complet des cours
-4. **Students** - CRUD complet des étudiants + démonstration OpenFeign
-
-### Design Features:
-- ✨ Gradients modernes
-- 🎭 Animations fluides
-- 📱 Design responsive
-- 🎨 Palette de couleurs cohérente
-- 💫 Effets hover et transitions
-- 📊 Cartes statistiques animées
+Chaque service expose sa documentation Swagger:
+- Courses: http://localhost:8082/swagger-ui.html
+- Students: http://localhost:8083/swagger-ui.html
+- Complaints: http://localhost:8084/swagger-ui.html
+- Clubs: http://localhost:8085/swagger-ui.html
+- Quiz: http://localhost:8086/swagger-ui.html
 
 ## 🧪 Tests des Endpoints
 
-### Authentification
+### Via API Gateway
 ```bash
-# Login
-curl -X POST http://localhost:8080/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"demo","password":"demo123"}'
-```
-
-### Courses
-```bash
-# Liste des cours
+# Courses
 curl http://localhost:8080/api/courses
 
-# Créer un cours
-curl -X POST http://localhost:8080/api/courses \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title":"Spring Boot Advanced",
-    "description":"Advanced Spring Boot concepts",
-    "instructor":"John Doe",
-    "durationHours":40,
-    "level":"ADVANCED"
-  }'
-```
-
-### Students avec OpenFeign
-```bash
-# Liste des étudiants
+# Students
 curl http://localhost:8080/api/students
 
-# Cours d'un étudiant (OpenFeign)
+# Student courses (OpenFeign)
 curl http://localhost:8080/api/students/1/courses
+```
+
+### Direct
+```bash
+# Courses Service
+curl http://localhost:8082/api/courses
+
+# Students Service
+curl http://localhost:8083/api/students
+```
+
+## 🐳 Commandes Docker
+
+### Démarrer
+```bash
+docker-compose up -d
+```
+
+### Rebuild
+```bash
+docker-compose up -d --build
+```
+
+### Arrêter
+```bash
+docker-compose down
+```
+
+### Arrêter et supprimer volumes
+```bash
+docker-compose down -v
+```
+
+### Logs
+```bash
+# Tous les services
+docker-compose logs -f
+
+# Un service spécifique
+docker-compose logs -f courses-service
+```
+
+### Statut
+```bash
+docker-compose ps
 ```
 
 ## 📝 Structure du Projet
 
 ```
-MicroservicesDemo/
-├── eureka-server/          # Service Discovery
-├── api-gateway/            # API Gateway
-├── auth-service/           # Authentification Keycloak
-├── courses-service/        # Gestion des cours
-├── student-service/        # Gestion des étudiants
-├── frontend/               # Application Angular
-└── docker/                 # Docker Compose
-    └── docker-compose.yml
+microservices/
+├── backend/
+│   ├── config-server/       # Configuration centralisée
+│   ├── eureka-server/        # Service Discovery
+│   ├── api-gateway/          # API Gateway
+│   ├── auth-service/         # Auth Java
+│   ├── auth-service-node/    # Auth Node.js
+│   ├── courses-service/      # Gestion cours
+│   ├── student-service/      # Gestion étudiants
+│   ├── complaints-service/   # Gestion réclamations
+│   ├── clubs-service/        # Gestion clubs
+│   └── quiz-service/         # Gestion quiz
+├── frontend/                 # Application Angular
+├── docker/                   # Scripts SQL init
+├── docker-compose.yml        # Orchestration
+└── .env.example             # Variables d'environnement
 ```
 
-## 🎯 Points Clés pour la Démonstration
+## 🔧 Configuration
 
-1. **Eureka Dashboard** - Montrer tous les services enregistrés
-2. **API Gateway** - Expliquer le routing centralisé
-3. **OpenFeign** - Démontrer la communication inter-services
-4. **Frontend** - Montrer l'interface moderne et les CRUD
-5. **Keycloak** - Expliquer l'authentification OAuth2
+### Variables d'Environnement (.env)
+```bash
+# Databases
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+MYSQL_ROOT_PASSWORD=rootpassword
+
+# Keycloak
+KEYCLOAK_ADMIN=admin
+KEYCLOAK_ADMIN_PASSWORD=admin
+
+# Ports
+EUREKA_PORT=8761
+API_GATEWAY_PORT=8080
+CONFIG_SERVER_PORT=8888
+```
 
 ## 🐛 Troubleshooting
 
-### Les services ne démarrent pas
-- Vérifier que PostgreSQL et Keycloak sont lancés
-- Vérifier les ports disponibles
-- Vérifier les logs des services
+### Services ne démarrent pas
+```bash
+# Vérifier les logs
+docker-compose logs -f
 
-### Erreur de connexion à la base de données
-- Vérifier que les bases `courses_db` et `students_db` existent
-- Vérifier les credentials PostgreSQL
+# Vérifier les ports
+lsof -i :8080
+```
 
-### Erreur d'authentification
-- Vérifier que Keycloak est configuré correctement
-- Vérifier que l'utilisateur `demo` existe
-- Vérifier le client `microservices-client`
+### Erreur de connexion DB
+```bash
+# Vérifier que les DB sont healthy
+docker-compose ps
+
+# Restart les DB
+docker-compose restart postgres mysql
+```
+
+### Keycloak ne démarre pas
+```bash
+# Attendre que postgres soit ready
+docker-compose logs -f keycloak
+```
+
+### Espace disque insuffisant
+```bash
+# Nettoyer Docker
+docker system prune -a --volumes
+
+# Vérifier l'espace sur SSD
+df -h /Volumes/ADATA\ SC740/
+```
 
 ## 📄 License
-
-Ce projet est à des fins éducatives et de démonstration.
+Projet éducatif - 4SAE Microservices
 
 ## 👨‍💻 Auteur
-
-Projet de démonstration pour le cours de Microservices - 4SAE
+Équipe Microservices 2024
