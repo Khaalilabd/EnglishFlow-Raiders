@@ -1,12 +1,12 @@
--- Création de la base de données principale
--- CREATE DATABASE microservices;  -- Déjà créée par POSTGRES_DB
+-- Création des bases de données
+-- La base principale est déjà créée par POSTGRES_DB (auth_db)
 
--- Connexion à la base microservices et création du schéma keycloak
--- Les commandes suivantes seront exécutées dans la base microservices
+-- Créer la base de données pour Keycloak
+CREATE DATABASE keycloak_db;
 
--- Créer le schéma pour Keycloak
-CREATE SCHEMA IF NOT EXISTS keycloak;
+-- Créer la base de données pour auth-service-node
+CREATE DATABASE auth_service_db;
 
 -- Les tables seront créées automatiquement par:
--- - Prisma pour auth-service-node (table users dans le schéma public)
--- - Keycloak pour ses propres tables (dans le schéma keycloak)
+-- - Keycloak pour ses propres tables (dans keycloak_db)
+-- - Prisma pour auth-service-node (dans auth_service_db)

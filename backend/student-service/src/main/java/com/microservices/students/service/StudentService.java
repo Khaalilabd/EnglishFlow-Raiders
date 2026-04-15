@@ -6,11 +6,15 @@ import com.microservices.students.dto.StudentDTO;
 import com.microservices.students.dto.StudentWithCoursesDTO;
 import com.microservices.students.entity.Student;
 import com.microservices.students.entity.StudentCourse;
+import com.microservices.students.messaging.StudentEventPublisher;
+import com.microservices.students.messaging.events.StudentEnrolledEvent;
 import com.microservices.students.repository.StudentCourseRepository;
 import com.microservices.students.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,11 +25,29 @@ public class StudentService {
     private final StudentRepository studentRepository;
     private final StudentCourseRepository studentCourseRepository;
     private final CoursesClient coursesClient;
+    private final StudentEventPublisher eventPublisher;
     
     public List<StudentDTO> getAllStudents() {
         return studentRepository.findAll().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+    }
+
+    public List<StudentDTO> searchStudents(String search) {
+        return studentRepository.searchStudents(search).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<StudentDTO> sortStudents(List<StudentDTO> students, String sortBy, String sortDir) {
+        java.util.Comparator<StudentDTO> comparator = switch (sortBy) {
+            case "lastName" -> java.util.Comparator.comparing(s -> s.getLastName() != null ? s.getLastName().toLowerCase() : "");
+            case "email" -> java.util.Comparator.comparing(s -> s.getEmail() != null ? s.getEmail().toLowerCase() : "");
+            case "enrollmentDate" -> java.util.Comparator.comparing(s -> s.getEnrollmentDate() != null ? s.getEnrollmentDate().toString() : "");
+            default -> java.util.Comparator.comparing(s -> s.getFirstName() != null ? s.getFirstName().toLowerCase() : "");
+        };
+        if ("desc".equalsIgnoreCase(sortDir)) comparator = comparator.reversed();
+        return students.stream().sorted(comparator).collect(Collectors.toList());
     }
     
     public StudentDTO getStudentById(Long id) {
@@ -52,6 +74,9 @@ public class StudentService {
     }
     
     public StudentDTO createStudent(StudentDTO studentDTO) {
+        if (studentRepository.findByEmail(studentDTO.getEmail()).isPresent()) {
+            throw new org.springframework.dao.DuplicateKeyException("Student with email " + studentDTO.getEmail() + " already exists");
+        }
         Student student = convertToEntity(studentDTO);
         Student savedStudent = studentRepository.save(student);
         return convertToDTO(savedStudent);
@@ -104,6 +129,27 @@ public class StudentService {
         studentCourse.setStudentId(studentId);
         studentCourse.setCourseId(courseId);
         studentCourseRepository.save(studentCourse);
+
+        // Publish async event to RabbitMQ → consumed by Clubs Service
+        try {
+            Student student = studentRepository.findById(studentId).orElse(null);
+            CourseDTO course = null;
+            try { course = coursesClient.getCourseById(courseId); } catch (Exception ignored) {}
+
+            StudentEnrolledEvent event = new StudentEnrolledEvent(
+                    studentId,
+                    student != null ? student.getFirstName() + " " + student.getLastName() : "Unknown",
+                    student != null ? student.getEmail() : "",
+                    courseId,
+                    course != null ? course.getTitle() : "Course #" + courseId,
+                    LocalDateTime.now()
+            );
+            eventPublisher.publishStudentEnrolled(event);
+        } catch (Exception e) {
+            // RabbitMQ failure must not block enrollment
+            org.slf4j.LoggerFactory.getLogger(StudentService.class)
+                    .warn("[RabbitMQ] Failed to publish StudentEnrolledEvent: {}", e.getMessage());
+        }
     }
     
     public void unenrollStudentFromCourse(Long studentId, Long courseId) {
@@ -137,5 +183,20 @@ public class StudentService {
     
     public List<StudentCourse> getAllEnrollments() {
         return studentCourseRepository.findAll();
+    }
+    
+    /**
+     * Get all students enrolled in a specific course
+     * Used by Courses Service via Feign Client
+     */
+    public List<StudentDTO> getStudentsByCourseId(Long courseId) {
+        List<StudentCourse> enrollments = studentCourseRepository.findByCourseId(courseId);
+        List<Long> studentIds = enrollments.stream()
+                .map(StudentCourse::getStudentId)
+                .collect(Collectors.toList());
+        
+        return studentRepository.findAllById(studentIds).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 }

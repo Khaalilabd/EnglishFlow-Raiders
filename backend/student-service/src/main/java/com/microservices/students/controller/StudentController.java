@@ -18,8 +18,20 @@ public class StudentController {
     private final StudentService studentService;
     
     @GetMapping
-    public ResponseEntity<List<StudentDTO>> getAllStudents() {
-        return ResponseEntity.ok(studentService.getAllStudents());
+    public ResponseEntity<List<StudentDTO>> getAllStudents(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false, defaultValue = "asc") String sortDir) {
+        List<StudentDTO> students;
+        if (search != null && !search.isBlank()) {
+            students = studentService.searchStudents(search);
+        } else {
+            students = studentService.getAllStudents();
+        }
+        if (sortBy != null && !sortBy.isEmpty()) {
+            students = studentService.sortStudents(students, sortBy, sortDir);
+        }
+        return ResponseEntity.ok(students);
     }
     
     @GetMapping("/{id}")
@@ -45,9 +57,14 @@ public class StudentController {
     }
     
     @PostMapping
-    public ResponseEntity<StudentDTO> createStudent(@RequestBody StudentDTO studentDTO) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(studentService.createStudent(studentDTO));
+    public ResponseEntity<?> createStudent(@RequestBody StudentDTO studentDTO) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(studentService.createStudent(studentDTO));
+        } catch (org.springframework.dao.DuplicateKeyException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(java.util.Map.of("error", e.getMessage()));
+        }
     }
     
     @PutMapping("/{id}")
@@ -64,5 +81,10 @@ public class StudentController {
     @GetMapping("/enrollments")
     public ResponseEntity<List<com.microservices.students.entity.StudentCourse>> getAllEnrollments() {
         return ResponseEntity.ok(studentService.getAllEnrollments());
+    }
+    
+    @GetMapping("/by-course/{courseId}")
+    public ResponseEntity<List<StudentDTO>> getStudentsByCourseId(@PathVariable Long courseId) {
+        return ResponseEntity.ok(studentService.getStudentsByCourseId(courseId));
     }
 }

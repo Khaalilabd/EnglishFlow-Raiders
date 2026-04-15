@@ -22,8 +22,29 @@ public class ClubController {
     private ClubMemberService clubMemberService;
 
     @GetMapping
-    public List<Club> getAllClubs() {
-        return clubRepository.findAll();
+    public List<Club> getAllClubs(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false, defaultValue = "asc") String sortDir) {
+        List<Club> clubs;
+        if (search != null || category != null) {
+            String s = (search != null && !search.isBlank()) ? search : null;
+            String c = (category != null && !category.isBlank()) ? category : null;
+            clubs = clubRepository.searchClubs(s, c);
+        } else {
+            clubs = clubRepository.findAll();
+        }
+        if (sortBy != null && !sortBy.isEmpty()) {
+            java.util.Comparator<Club> cmp = switch (sortBy) {
+                case "category" -> java.util.Comparator.comparing(cl -> cl.getCategory() != null ? cl.getCategory() : "");
+                case "currentMembers" -> java.util.Comparator.comparingInt(cl -> cl.getCurrentMembers() != null ? cl.getCurrentMembers() : 0);
+                default -> java.util.Comparator.comparing(cl -> cl.getName() != null ? cl.getName().toLowerCase() : "");
+            };
+            if ("desc".equalsIgnoreCase(sortDir)) cmp = cmp.reversed();
+            clubs = clubs.stream().sorted(cmp).collect(java.util.stream.Collectors.toList());
+        }
+        return clubs;
     }
 
     @GetMapping("/{id}")

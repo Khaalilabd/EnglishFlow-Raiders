@@ -357,7 +357,7 @@ import { Router } from '@angular/router';
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+      background: #1a1f35;
       padding: 20px;
       position: relative;
       overflow: hidden;
@@ -368,11 +368,10 @@ import { Router } from '@angular/router';
       position: absolute;
       width: 500px;
       height: 500px;
-      background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%);
       border-radius: 50%;
       top: -250px;
       right: -250px;
-      animation: float 20s ease-in-out infinite;
     }
 
     .login-wrapper::after {
@@ -380,16 +379,10 @@ import { Router } from '@angular/router';
       position: absolute;
       width: 400px;
       height: 400px;
-      background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 70%);
       border-radius: 50%;
       bottom: -200px;
       left: -200px;
-      animation: float 15s ease-in-out infinite reverse;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translate(0, 0); }
-      50% { transform: translate(30px, 30px); }
     }
 
     .login-container {
@@ -428,13 +421,13 @@ import { Router } from '@angular/router';
       width: 72px;
       height: 72px;
       margin: 0 auto 24px;
-      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      background: #10b981;
       border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+      box-shadow: 0 8px 24px rgba(16,185,129,0.3);
     }
 
     .login-header h1 {
@@ -484,7 +477,7 @@ import { Router } from '@angular/router';
     .btn-forgot {
       background: none;
       border: none;
-      color: #3b82f6;
+      color: #059669;
       font-size: 13px;
       font-weight: 500;
       cursor: pointer;
@@ -493,7 +486,7 @@ import { Router } from '@angular/router';
     }
 
     .btn-forgot:hover {
-      color: #2563eb;
+      color: #047857;
       text-decoration: underline;
     }
 
@@ -535,8 +528,8 @@ import { Router } from '@angular/router';
     .form-group input:focus,
     .select-input:focus {
       outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+      border-color: #10b981;
+      box-shadow: 0 0 0 4px rgba(16,185,129,0.1);
     }
 
     .input-wrapper input:focus ~ .input-icon {
@@ -557,7 +550,7 @@ import { Router } from '@angular/router';
     .btn-primary {
       width: 100%;
       padding: 16px;
-      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      background: #059669;
       color: white;
       border: none;
       border-radius: 12px;
@@ -565,13 +558,14 @@ import { Router } from '@angular/router';
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s;
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      box-shadow: 0 4px 12px rgba(5,150,105,0.3);
       margin-top: 8px;
     }
 
     .btn-primary:hover:not(:disabled) {
+      background: #047857;
       transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+      box-shadow: 0 8px 20px rgba(5,150,105,0.35);
     }
 
     .btn-primary:active:not(:disabled) {
@@ -774,7 +768,7 @@ import { Router } from '@angular/router';
     .btn-link {
       background: none;
       border: none;
-      color: #3b82f6;
+      color: #059669;
       font-size: 15px;
       font-weight: 600;
       cursor: pointer;
@@ -783,7 +777,7 @@ import { Router } from '@angular/router';
     }
 
     .btn-link:hover {
-      color: #2563eb;
+      color: #047857;
       text-decoration: underline;
     }
 

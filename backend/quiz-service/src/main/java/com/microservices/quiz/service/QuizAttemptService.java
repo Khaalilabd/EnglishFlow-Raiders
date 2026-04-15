@@ -6,6 +6,8 @@ import com.microservices.quiz.dto.QuizSubmissionDTO;
 import com.microservices.quiz.entity.Question;
 import com.microservices.quiz.entity.Quiz;
 import com.microservices.quiz.entity.QuizAttempt;
+import com.microservices.quiz.messaging.QuizEventPublisher;
+import com.microservices.quiz.messaging.events.QuizCompletedEvent;
 import com.microservices.quiz.repository.QuestionRepository;
 import com.microservices.quiz.repository.QuizAttemptRepository;
 import com.microservices.quiz.repository.QuizRepository;
@@ -23,6 +25,7 @@ public class QuizAttemptService {
     private final QuizAttemptRepository attemptRepository;
     private final QuizRepository quizRepository;
     private final QuestionRepository questionRepository;
+    private final QuizEventPublisher eventPublisher;
     private final ObjectMapper objectMapper = new ObjectMapper();
     
     public QuizResultDTO submitQuiz(QuizSubmissionDTO submission) {
@@ -68,6 +71,27 @@ public class QuizAttemptService {
         
         QuizAttempt savedAttempt = attemptRepository.save(attempt);
         
+        // Publish async event to RabbitMQ → consumed by Courses Service
+        try {
+            QuizCompletedEvent event = new QuizCompletedEvent(
+                    savedAttempt.getId(),
+                    quiz.getId(),
+                    quiz.getTitle(),
+                    quiz.getCourseId(),
+                    submission.getStudentId(),
+                    submission.getStudentName(),
+                    score,
+                    passed,
+                    totalQuestions,
+                    correctAnswers,
+                    savedAttempt.getCompletedAt()
+            );
+            eventPublisher.publishQuizCompleted(event);
+        } catch (Exception e) {
+            // RabbitMQ failure must not block quiz submission
+            System.err.println("[RabbitMQ] Failed to publish QuizCompletedEvent: " + e.getMessage());
+        }
+
         String message = passed 
                 ? "Félicitations! Vous avez réussi le quiz." 
                 : "Vous n'avez pas atteint le score minimum. Réessayez!";

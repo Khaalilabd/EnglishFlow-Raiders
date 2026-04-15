@@ -23,14 +23,21 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
   instance:
-    prefer-ip-address: true
-    hostname: ${HOSTNAME:localhost}
+    prefer-ip-address: false
+    hostname: localhost
+    ip-address: 127.0.0.1
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,env
+        include: health,info,metrics,env,prometheus
   endpoint:
     health:
       show-details: always
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true

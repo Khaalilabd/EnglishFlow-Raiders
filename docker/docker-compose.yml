@@ -60,6 +60,9 @@ services:
       KC_HEALTH_ENABLED: true
     ports:
       - "9090:9090"
+    volumes:
+      # Monte le thème personnalisé dans le dossier themes de Keycloak
+      - ../keycloak-theme:/opt/keycloak/themes
     command:
       - start-dev
       - --http-port=9090

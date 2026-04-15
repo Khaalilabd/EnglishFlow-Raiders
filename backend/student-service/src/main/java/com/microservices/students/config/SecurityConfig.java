@@ -1,4 +1,4 @@
-package com.microservices.student.config;
+package com.microservices.students.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

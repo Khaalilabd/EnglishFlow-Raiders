@@ -44,6 +44,25 @@ services:
       retries: 5
     restart: unless-stopped
 
+  # ==================== MESSAGE BROKER ====================
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
   # ==================== KEYCLOAK ====================
   keycloak:
     image: quay.io/keycloak/keycloak:23.0
@@ -61,7 +80,10 @@ services:
       KC_HOSTNAME_STRICT_HTTPS: false
       KC_PROXY: edge
     ports:
-      - "${KEYCLOAK_PORT:-9090}:8080"
+      - "${KEYCLOAK_PORT:-9090}:8080" 
+    volumes:
+      # Thème personnalisé – reproduit le design du frontend Angular
+      - ./keycloak-theme:/opt/keycloak/themes
     depends_on:
       postgres:
         condition: service_healthy
@@ -148,11 +170,13 @@ services:
       KEYCLOAK_URL: http://keycloak:8080
       KEYCLOAK_REALM: microservices
       KEYCLOAK_CLIENT_ID: microservices-client
-      KEYCLOAK_CLIENT_SECRET: EpcrSbDeP26McC1gW1ydvpkT2pin1wbe
+      KEYCLOAK_CLIENT_SECRET: WkyJri4R0QnLhPXKSHt3uiMfiBuP1yfT
       KEYCLOAK_ADMIN_USERNAME: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       EUREKA_HOST: eureka-server
       EUREKA_PORT: 8761
+      HOST_IP: auth-service-node
+      HOSTNAME: auth-service-node
       PORT: 3001
       STUDENT_SERVICE_URL: http://student-service:8083
       NODE_ENV: production
@@ -187,10 +211,12 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
       SPRING_PROFILES_ACTIVE: docker
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
       SPRING_CLOUD_CONFIG_USERNAME: configuser
       SPRING_CLOUD_CONFIG_PASSWORD: configpass
+      SPRING_RABBITMQ_HOST: rabbitmq
       ZIPKIN_URL: http://zipkin:9411/api/v2/spans
     depends_on:
       mysql:
@@ -221,10 +247,12 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
       SPRING_PROFILES_ACTIVE: docker
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
       SPRING_CLOUD_CONFIG_USERNAME: configuser
       SPRING_CLOUD_CONFIG_PASSWORD: configpass
+      SPRING_RABBITMQ_HOST: rabbitmq
       ZIPKIN_URL: http://zipkin:9411/api/v2/spans
     depends_on:
       mysql:
@@ -252,6 +280,7 @@ services:
       - "${COMPLAINTS_SERVICE_PORT:-8084}:8084"
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
       SPRING_PROFILES_ACTIVE: docker
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
       SPRING_CLOUD_CONFIG_USERNAME: configuser
@@ -280,10 +309,12 @@ services:
       - "${CLUBS_SERVICE_PORT:-8085}:8085"
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
       SPRING_PROFILES_ACTIVE: docker
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
       SPRING_CLOUD_CONFIG_USERNAME: configuser
       SPRING_CLOUD_CONFIG_PASSWORD: configpass
+      SPRING_RABBITMQ_HOST: rabbitmq
     depends_on:
       config-server:
         condition: service_healthy
@@ -308,10 +339,12 @@ services:
       - "${QUIZ_SERVICE_PORT:-8086}:8086"
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
       SPRING_PROFILES_ACTIVE: docker
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
       SPRING_CLOUD_CONFIG_USERNAME: configuser
       SPRING_CLOUD_CONFIG_PASSWORD: configpass
+      SPRING_RABBITMQ_HOST: rabbitmq
     depends_on:
       config-server:
         condition: service_healthy
@@ -365,9 +398,12 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/provisioning/dashboards/microservices-overview.json
     volumes:
       - grafana_data:/var/lib/grafana
       - ./docker/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./docker/grafana-dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
+      - ./docker/dashboards:/etc/grafana/provisioning/dashboards
     depends_on:
       - prometheus
     networks:

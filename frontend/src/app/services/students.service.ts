@@ -14,7 +14,7 @@ export interface Student {
   providedIn: 'root'
 })
 export class StudentsService {
-  private apiUrl = 'http://localhost:8080/api/students';
+  private apiUrl = 'http://localhost:8080/students-service/students';
 
   constructor(private http: HttpClient) {}
 

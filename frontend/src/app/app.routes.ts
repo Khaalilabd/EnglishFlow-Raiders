@@ -8,7 +8,7 @@ import { StudentsComponent } from './components/students.component';
 import { EnrollmentsComponent } from './components/enrollments.component';
 import { ComplaintsComponent } from './components/complaints.component';
 import { ClubsComponent } from './components/clubs.component';
-import { QuizComponent } from './components/quiz.component';
+import { QuizMainComponent } from './components/quiz-main.component';
 import { UsersComponent } from './components/users.component';
 import { MyCoursesComponent } from './components/my-courses.component';
 import { MyComplaintsComponent } from './components/my-complaints.component';
@@ -36,7 +36,7 @@ export const routes: Routes = [
       { path: 'enrollments', component: EnrollmentsComponent },
       { path: 'complaints', component: ComplaintsComponent },
       { path: 'clubs', component: ClubsComponent },
-      { path: 'quiz', component: QuizComponent },
+      { path: 'quiz', component: QuizMainComponent },
       { path: 'quiz/take/:id', component: TakeQuizComponent },
       { path: 'users', component: UsersComponent }
     ]

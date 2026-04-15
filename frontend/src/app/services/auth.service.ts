@@ -58,15 +58,15 @@ export class AuthService {
   }
 
   canManageCourses(): boolean {
-    return this.isTutorOrAdmin();
+    return this.isTutor();
   }
 
   canManageStudents(): boolean {
-    return this.isTutorOrAdmin();
+    return false;
   }
 
   canManageEnrollments(): boolean {
-    return this.isTutorOrAdmin();
+    return false;
   }
 
   canManageClubs(): boolean {
@@ -78,7 +78,7 @@ export class AuthService {
   }
 
   canCreateQuiz(): boolean {
-    return this.isTutorOrAdmin();
+    return this.isTutor();
   }
 
   canTakeQuiz(): boolean {

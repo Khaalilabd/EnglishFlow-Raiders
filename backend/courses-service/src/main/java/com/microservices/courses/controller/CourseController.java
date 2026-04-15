@@ -17,13 +17,31 @@ public class CourseController {
     private final CourseService courseService;
     
     @GetMapping
-    public ResponseEntity<List<CourseDTO>> getAllCourses() {
-        return ResponseEntity.ok(courseService.getAllCourses());
+    public ResponseEntity<List<CourseDTO>> getAllCourses(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String level,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false, defaultValue = "asc") String sortDir) {
+        List<CourseDTO> courses;
+        if (search != null || level != null) {
+            courses = courseService.searchCourses(search, level);
+        } else {
+            courses = courseService.getAllCourses();
+        }
+        if (sortBy != null && !sortBy.isEmpty()) {
+            courses = courseService.sortCourses(courses, sortBy, sortDir);
+        }
+        return ResponseEntity.ok(courses);
     }
     
     @GetMapping("/{id}")
     public ResponseEntity<CourseDTO> getCourseById(@PathVariable Long id) {
         return ResponseEntity.ok(courseService.getCourseById(id));
+    }
+    
+    @GetMapping("/{id}/students")
+    public ResponseEntity<com.microservices.courses.dto.CourseWithStudentsDTO> getCourseWithStudents(@PathVariable Long id) {
+        return ResponseEntity.ok(courseService.getCourseWithStudents(id));
     }
     
     @PostMapping("/by-ids")

@@ -124,7 +124,7 @@ import { ActivatedRoute, Router } from '@angular/router';
     }
 
     .quiz-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #059669;
       color: white;
       padding: 40px;
       border-radius: 16px;
@@ -168,7 +168,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      background: #059669;
       transition: width 0.3s ease;
     }
 
@@ -191,7 +191,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
     .question-card h2 {
       margin: 0 0 16px 0;
-      color: #667eea;
+      color: #059669;
       font-size: 18px;
       font-weight: 600;
     }
@@ -223,13 +223,13 @@ import { ActivatedRoute, Router } from '@angular/router';
     }
 
     .option:hover {
-      border-color: #667eea;
+      border-color: #10b981;
       background: #f8f9ff;
     }
 
     .option.selected {
-      border-color: #667eea;
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      border-color: #10b981;
+      background: linear-gradient(135deg, rgba(16,185,129,.1) 0%, rgba(118, 75, 162, 0.1) 100%);
     }
 
     .option-radio {
@@ -245,8 +245,8 @@ import { ActivatedRoute, Router } from '@angular/router';
     }
 
     .option.selected .option-radio {
-      border-color: #667eea;
-      background: #667eea;
+      border-color: #10b981;
+      background: #059669;
     }
 
     .radio-dot {
@@ -285,7 +285,7 @@ import { ActivatedRoute, Router } from '@angular/router';
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #059669;
       color: white;
     }
 
@@ -296,7 +296,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
     .btn-submit {
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      color: white;
+      color: #111827;
     }
 
     .btn-submit:hover {
@@ -338,12 +338,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 
     .result-icon.passed {
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      color: white;
+      color: #111827;
     }
 
     .result-icon.failed {
       background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-      color: white;
+      color: #111827;
     }
 
     .result-card h1 {
@@ -361,7 +361,7 @@ import { ActivatedRoute, Router } from '@angular/router';
       height: 180px;
       margin: 0 auto;
       border-radius: 50%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #059669;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -371,7 +371,7 @@ import { ActivatedRoute, Router } from '@angular/router';
     .score-value {
       font-size: 48px;
       font-weight: 700;
-      color: white;
+      color: #111827;
     }
 
     .result-stats {
@@ -390,7 +390,7 @@ import { ActivatedRoute, Router } from '@angular/router';
     .stat-value {
       font-size: 36px;
       font-weight: 700;
-      color: #667eea;
+      color: #059669;
     }
 
     .stat-label {
@@ -452,7 +452,7 @@ export class TakeQuizComponent implements OnInit {
     const email = localStorage.getItem('user_email');
     if (email) {
       console.log('Loading student by email:', email);
-      this.http.get<any[]>('http://localhost:8080/api/students').subscribe({
+      this.http.get<any[]>('http://localhost:8080/students-service/students').subscribe({
         next: (students) => {
           const student = students.find(s => s.email === email);
           if (student) {
@@ -474,7 +474,7 @@ export class TakeQuizComponent implements OnInit {
   checkPreviousAttempts() {
     if (!this.studentId || !this.quiz.id) return;
 
-    this.http.get<any[]>(`http://localhost:8080/api/quizzes/${this.quiz.id}/attempts/student/${this.studentId}`).subscribe({
+    this.http.get<any[]>(`http://localhost:8080/quiz-service/api/quizzes/${this.quiz.id}/attempts/student/${this.studentId}`).subscribe({
       next: (attempts) => {
         if (attempts && attempts.length > 0) {
           // L'étudiant a déjà passé ce quiz
@@ -498,7 +498,7 @@ export class TakeQuizComponent implements OnInit {
   }
 
   loadQuiz(quizId: number) {
-    this.http.get<any>(`http://localhost:8080/api/quizzes/${quizId}`).subscribe({
+    this.http.get<any>(`http://localhost:8080/quiz-service/api/quizzes/${quizId}`).subscribe({
       next: (data) => {
         this.quiz = data.quiz;
         // Parser les options pour chaque question
@@ -568,7 +568,7 @@ export class TakeQuizComponent implements OnInit {
 
     console.log('Submitting quiz with data:', submission);
 
-    this.http.post<any>('http://localhost:8080/api/quizzes/submit', submission).subscribe({
+    this.http.post<any>('http://localhost:8080/quiz-service/api/quizzes/submit', submission).subscribe({
       next: (result) => {
         this.result = result;
         this.showResult = true;

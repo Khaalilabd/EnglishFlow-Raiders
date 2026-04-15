@@ -67,7 +67,7 @@ import { AuthService } from '../services/auth.service';
         <div class="nav-section">
           <span class="nav-label">GESTION</span>
           
-          @if (canManageStudents()) {
+          @if (isAdmin()) {
             <a routerLink="/users-approval" routerLinkActive="active" class="nav-item">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -78,7 +78,7 @@ import { AuthService } from '../services/auth.service';
             </a>
           }
 
-          @if (canManageStudents()) {
+          @if (authService.isTutorOrAdmin()) {
             <a routerLink="/students" routerLinkActive="active" class="nav-item">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -90,7 +90,7 @@ import { AuthService } from '../services/auth.service';
             </a>
           }
 
-          @if (canManageEnrollments()) {
+          @if (authService.isTutorOrAdmin()) {
             <a routerLink="/enrollments" routerLinkActive="active" class="nav-item">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -124,7 +124,7 @@ import { AuthService } from '../services/auth.service';
               </svg>
               <span>Historique Quiz</span>
             </a>
-          } @else {
+          } @else if (authService.isAdmin()) {
             <a routerLink="/clubs" routerLinkActive="active" class="nav-item">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -192,40 +192,39 @@ import { AuthService } from '../services/auth.service';
   `,
   styles: [`
     .sidebar {
-      width: 280px;
+      width: 260px;
       height: 100vh;
-      background: linear-gradient(180deg, #0a0e27 0%, #0f1629 100%);
-      border-right: 1px solid rgba(255, 255, 255, 0.06);
+      background: var(--sidebar-bg, #1a1f35);
+      border-right: 1px solid rgba(255,255,255,0.06);
       display: flex;
       flex-direction: column;
       position: fixed;
       left: 0;
       top: 0;
       z-index: 1000;
-      backdrop-filter: blur(20px);
     }
 
     .sidebar-header {
-      padding: 24px 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 20px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
     }
 
     .logo {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
     .logo-icon {
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 10px;
+      width: 36px;
+      height: 36px;
+      background: #10b981;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+      flex-shrink: 0;
     }
 
     .logo-text {
@@ -234,191 +233,128 @@ import { AuthService } from '../services/auth.service';
     }
 
     .logo-title {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 700;
       color: white;
-      letter-spacing: -0.5px;
+      letter-spacing: -0.3px;
+      line-height: 1.2;
     }
 
     .logo-subtitle {
-      font-size: 11px;
-      color: rgba(255, 255, 255, 0.5);
+      font-size: 10px;
+      color: rgba(255,255,255,0.45);
       font-weight: 500;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.8px;
     }
 
     .sidebar-nav {
       flex: 1;
       overflow-y: auto;
-      padding: 20px 16px;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+      padding: 16px 12px;
+      scrollbar-width: none;
     }
-
-    .sidebar-nav::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    .sidebar-nav::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
-    }
+    .sidebar-nav::-webkit-scrollbar { display: none; }
 
     .nav-section {
-      margin-bottom: 28px;
+      margin-bottom: 24px;
     }
 
     .nav-label {
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 600;
-      color: rgba(255, 255, 255, 0.4);
+      color: rgba(255,255,255,0.35);
       text-transform: uppercase;
-      letter-spacing: 1.2px;
-      padding: 0 12px;
+      letter-spacing: 1px;
+      padding: 0 10px;
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .nav-item {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 12px 12px;
-      margin: 4px 0;
-      border-radius: 10px;
-      color: rgba(255, 255, 255, 0.7);
+      gap: 10px;
+      padding: 10px 10px;
+      margin: 2px 0;
+      border-radius: 8px;
+      color: rgba(255,255,255,0.6);
       text-decoration: none;
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .nav-item::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-      opacity: 0;
-      transition: opacity 0.3s;
+      transition: all 0.2s ease;
     }
 
     .nav-item:hover {
       color: white;
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    .nav-item:hover::before {
-      opacity: 1;
+      background: rgba(255,255,255,0.06);
     }
 
     .nav-item.active {
       color: white;
-      background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+      background: rgba(255,255,255,0.09);
     }
 
-    .nav-item.active::before {
-      opacity: 1;
-    }
+    .nav-item svg { flex-shrink: 0; opacity: 0.8; }
+    .nav-item.active svg { opacity: 1; color: #10b981; }
+    .nav-item:hover svg { opacity: 1; }
 
-    .nav-item svg {
-      flex-shrink: 0;
-      transition: transform 0.3s;
-    }
-
-    .nav-item:hover svg {
-      transform: scale(1.1);
-    }
-
-    .nav-item span {
-      flex: 1;
-      position: relative;
-      z-index: 1;
-    }
-
-    .active-indicator {
-      width: 6px;
-      height: 6px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 50%;
-      box-shadow: 0 0 8px rgba(102, 126, 234, 0.6);
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.7; transform: scale(0.9); }
-    }
+    .nav-item span { flex: 1; }
 
     .sidebar-footer {
-      padding: 16px;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 14px 12px;
+      border-top: 1px solid rgba(255,255,255,0.06);
     }
 
     .user-card {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 12px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 12px;
-      transition: all 0.3s;
+      gap: 10px;
+      padding: 10px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px;
+      transition: background 0.2s;
     }
+    .user-card:hover { background: rgba(255,255,255,0.07); }
 
-    .user-card:hover {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .user-avatar {
-      position: relative;
-      flex-shrink: 0;
-    }
+    .user-avatar { position: relative; flex-shrink: 0; }
 
     .avatar-gradient {
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 10px;
+      width: 36px;
+      height: 36px;
+      background: #10b981;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
       font-weight: 700;
-      font-size: 14px;
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      font-size: 13px;
     }
 
     .status-indicator {
       position: absolute;
       bottom: -2px;
       right: -2px;
-      width: 12px;
-      height: 12px;
+      width: 10px;
+      height: 10px;
       background: #10b981;
-      border: 2px solid #0a0e27;
+      border: 2px solid #1a1f35;
       border-radius: 50%;
-      box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
     }
 
     .user-details {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 1px;
       min-width: 0;
     }
 
     .user-name {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       color: white;
       white-space: nowrap;
@@ -427,47 +363,33 @@ import { AuthService } from '../services/auth.service';
     }
 
     .user-role {
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.5);
+      font-size: 11px;
+      color: rgba(255,255,255,0.45);
     }
 
     .logout-btn {
-      width: 36px;
-      height: 36px;
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.2);
-      border-radius: 8px;
+      width: 32px;
+      height: 32px;
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.2);
+      border-radius: 7px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #ef4444;
+      color: #f87171;
       cursor: pointer;
-      transition: all 0.3s;
+      transition: all 0.2s;
       flex-shrink: 0;
     }
-
-    .logout-btn:hover {
-      background: rgba(239, 68, 68, 0.2);
-      border-color: rgba(239, 68, 68, 0.3);
-      transform: scale(1.05);
-    }
+    .logout-btn:hover { background: rgba(239,68,68,0.18); }
 
     @media (max-width: 1024px) {
-      .sidebar {
-        width: 240px;
-      }
+      .sidebar { width: 230px; }
     }
 
     @media (max-width: 768px) {
-      .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-      }
-
-      .sidebar-nav {
-        max-height: 400px;
-      }
+      .sidebar { width: 100%; height: auto; position: relative; }
+      .sidebar-nav { max-height: 360px; }
     }
   `]
 })

@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ComplaintResolutionDTO {
-    private String status; // IN_PROGRESS, RESOLVED, CLOSED
-    private String response; // Réponse de l'admin/tuteur
-    private String handledBy; // Nom de l'admin/tuteur
-    private Long handledByUserId; // ID de l'admin/tuteur
+    private String status;
+    private String response;
+    private String handledBy;
+    private Long handledByUserId;
 }

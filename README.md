@@ -61,7 +61,30 @@ Architecture microservices complète avec Spring Boot, Eureka, API Gateway, Conf
 
 ## 🚀 Démarrage Rapide
 
-### 1. Configurer Docker sur SSD Externe
+### ⚡ Méthode Automatisée (Recommandée)
+
+**Avec Make (Linux/Mac):**
+```bash
+make start
+```
+
+**Avec Scripts:**
+```bash
+# Linux/Mac
+chmod +x build-and-start.sh
+./build-and-start.sh
+
+# Windows PowerShell
+.\build-and-start.ps1
+```
+
+Le script démarre automatiquement tous les services dans le bon ordre et attend que chaque service soit prêt avant de passer au suivant.
+
+📖 **Documentation complète**: Voir [QUICK_START.md](QUICK_START.md) et [BUILD_GUIDE.md](BUILD_GUIDE.md)
+
+### 🔧 Méthode Manuelle
+
+### 1. Configurer Docker sur SSD Externe (Optionnel)
 
 **Via Docker Desktop** :
 1. Ouvrir Docker Desktop
@@ -82,11 +105,15 @@ docker-compose up -d --build
 ### 4. Vérifier le statut
 ```bash
 docker-compose ps
+# ou
+make ps
 ```
 
 ### 5. Voir les logs
 ```bash
 docker-compose logs -f
+# ou
+make logs
 ```
 
 ## 🌐 URLs d'Accès
@@ -195,39 +222,50 @@ curl http://localhost:8083/api/students
 
 ## 🐳 Commandes Docker
 
-### Démarrer
+### Avec Make (Recommandé)
 ```bash
+make help              # Voir toutes les commandes
+make start             # Démarrer tous les services
+make stop              # Arrêter tous les services
+make clean             # Nettoyage complet
+make ps                # État des services
+make logs              # Voir tous les logs
+make logs-gateway      # Logs d'un service spécifique
+make restart-service SERVICE=student-service  # Redémarrer un service
+make urls              # Afficher les URLs d'accès
+make health            # Vérifier la santé des services
+```
+
+### Avec Docker Compose
+```bash
+# Démarrer
 docker-compose up -d
-```
 
-### Rebuild
-```bash
+# Rebuild
 docker-compose up -d --build
-```
 
-### Arrêter
-```bash
+# Arrêter
 docker-compose down
-```
 
-### Arrêter et supprimer volumes
-```bash
+# Arrêter et supprimer volumes
 docker-compose down -v
-```
 
-### Logs
-```bash
-# Tous les services
-docker-compose logs -f
+# Logs
+docker-compose logs -f                    # Tous les services
+docker-compose logs -f courses-service    # Un service spécifique
 
-# Un service spécifique
-docker-compose logs -f courses-service
-```
-
-### Statut
-```bash
+# Statut
 docker-compose ps
 ```
+
+## 📚 Documentation
+
+- **[QUICK_START.md](QUICK_START.md)** - Guide de démarrage rapide (3 minutes)
+- **[BUILD_GUIDE.md](BUILD_GUIDE.md)** - Guide complet de build et démarrage
+- **[SCRIPTS_REFERENCE.md](SCRIPTS_REFERENCE.md)** - Référence complète de tous les scripts
+- **[WINDOWS_GUIDE.md](WINDOWS_GUIDE.md)** - Guide spécifique pour Windows
+- **[FEIGN_SCENARIOS.md](FEIGN_SCENARIOS.md)** - Scénarios d'utilisation OpenFeign
+- **[SWAGGER_CENTRALIZED.md](SWAGGER_CENTRALIZED.md)** - Documentation Swagger centralisée
 
 ## 📝 Structure du Projet
 

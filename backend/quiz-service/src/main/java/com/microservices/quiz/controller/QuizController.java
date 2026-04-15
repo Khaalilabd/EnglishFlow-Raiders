@@ -25,8 +25,30 @@ public class QuizController {
     private com.microservices.quiz.service.QuizAttemptService quizAttemptService;
 
     @GetMapping
-    public List<Quiz> getAllQuizzes() {
-        return quizRepository.findAll();
+    public List<Quiz> getAllQuizzes(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String difficulty,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false, defaultValue = "asc") String sortDir) {
+        List<Quiz> quizzes;
+        if (search != null || difficulty != null) {
+            String s = (search != null && !search.isBlank()) ? search : null;
+            String d = (difficulty != null && !difficulty.isBlank()) ? difficulty : null;
+            quizzes = quizRepository.searchQuizzes(s, d);
+        } else {
+            quizzes = quizRepository.findAll();
+        }
+        if (sortBy != null && !sortBy.isEmpty()) {
+            java.util.Comparator<Quiz> cmp = switch (sortBy) {
+                case "difficulty" -> java.util.Comparator.comparing(q -> q.getDifficulty() != null ? q.getDifficulty() : "");
+                case "timeLimit" -> java.util.Comparator.comparingInt(q -> q.getTimeLimit() != null ? q.getTimeLimit() : 0);
+                case "passingScore" -> java.util.Comparator.comparingInt(q -> q.getPassingScore() != null ? q.getPassingScore() : 0);
+                default -> java.util.Comparator.comparing(q -> q.getTitle() != null ? q.getTitle().toLowerCase() : "");
+            };
+            if ("desc".equalsIgnoreCase(sortDir)) cmp = cmp.reversed();
+            quizzes = quizzes.stream().sorted(cmp).collect(java.util.stream.Collectors.toList());
+        }
+        return quizzes;
     }
 
     @GetMapping("/{id}")
