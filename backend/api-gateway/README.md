@@ -35,12 +35,6 @@ http://localhost:8080/api/courses/**
 # Students Service
 http://localhost:8080/api/students/**
 
-# Complaints Service
-http://localhost:8080/api/complaints/**
-
-# Clubs Service
-http://localhost:8080/api/clubs/**
-
 # Quiz Service
 http://localhost:8080/api/quiz/**
 ```

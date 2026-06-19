@@ -12,14 +12,15 @@ import { AuthService } from '../services/auth.service';
       <div class="sidebar-header">
         <div class="logo">
           <div class="logo-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/>
+              <path d="M2 12l10 5 10-5"/>
             </svg>
           </div>
           <div class="logo-text">
-            <span class="logo-title">EnglishFlow</span>
-            <span class="logo-subtitle">Academic</span>
+            <span class="logo-title">Gestion d'école</span>
+            <span class="logo-subtitle">School Management</span>
           </div>
         </div>
       </div>
@@ -106,51 +107,13 @@ import { AuthService } from '../services/auth.service';
         <div class="nav-section">
           <span class="nav-label">COMMUNAUTÉ</span>
           
-          @if (authService.isStudent()) {
-            <a routerLink="/my-clubs" routerLinkActive="active" class="nav-item">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-              </svg>
-              <span>Mes Clubs</span>
-            </a>
-            
-            <a routerLink="/my-quiz-history" routerLinkActive="active" class="nav-item">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 11l3 3L22 4"/>
-                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-              </svg>
-              <span>Historique Quiz</span>
-            </a>
-          } @else if (authService.isAdmin()) {
-            <a routerLink="/clubs" routerLinkActive="active" class="nav-item">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-              </svg>
-              <span>Clubs</span>
-            </a>
-          }
-
-          @if (authService.isStudent()) {
-            <a routerLink="/my-complaints" routerLinkActive="active" class="nav-item">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              </svg>
-              <span>Mes Réclamations</span>
-            </a>
-          } @else {
-            <a routerLink="/complaints" routerLinkActive="active" class="nav-item">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              </svg>
-              <span>Réclamations</span>
-            </a>
-          }
+          <a routerLink="/my-quiz-history" routerLinkActive="active" class="nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 11l3 3L22 4"/>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+            <span>Historique Quiz</span>
+          </a>
         </div>
 
         @if (isAdmin()) {
@@ -218,7 +181,7 @@ import { AuthService } from '../services/auth.service';
     .logo-icon {
       width: 36px;
       height: 36px;
-      background: #10b981;
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
       border-radius: 8px;
       display: flex;
       align-items: center;
@@ -297,7 +260,7 @@ import { AuthService } from '../services/auth.service';
     }
 
     .nav-item svg { flex-shrink: 0; opacity: 0.8; }
-    .nav-item.active svg { opacity: 1; color: #10b981; }
+    .nav-item.active svg { opacity: 1; color: #3b82f6; }
     .nav-item:hover svg { opacity: 1; }
 
     .nav-item span { flex: 1; }
@@ -324,7 +287,7 @@ import { AuthService } from '../services/auth.service';
     .avatar-gradient {
       width: 36px;
       height: 36px;
-      background: #10b981;
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
       border-radius: 8px;
       display: flex;
       align-items: center;
@@ -340,8 +303,8 @@ import { AuthService } from '../services/auth.service';
       right: -2px;
       width: 10px;
       height: 10px;
-      background: #10b981;
-      border: 2px solid #1a1f35;
+      background: #22c55e;
+      border: 2px solid #0b1120;
       border-radius: 50%;
     }
 
@@ -419,14 +382,6 @@ export class NavbarComponent implements OnInit {
 
   canManageEnrollments(): boolean {
     return this.authService.canManageEnrollments();
-  }
-
-  canManageClubs(): boolean {
-    return this.authService.canManageClubs();
-  }
-
-  canViewComplaints(): boolean {
-    return this.authService.canViewAllComplaints() || this.authService.canSubmitComplaints();
   }
 
   getUserName(): string {

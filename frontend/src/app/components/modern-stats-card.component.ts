@@ -80,7 +80,7 @@ import { CommonModule } from '@angular/common';
       left: 0;
       right: 0;
       height: 4px;
-      background: linear-gradient(90deg, var(--primary-500, #10b981), var(--primary-600, #059669));
+      background: linear-gradient(90deg, var(--primary-500, #3b82f6), var(--primary-600, #2563eb));
       transform: scaleX(0);
       transition: transform 0.3s ease;
     }
@@ -122,7 +122,7 @@ import { CommonModule } from '@angular/common';
     }
 
     .stat-icon.blue { color: #3b82f6; }
-    .stat-icon.green { color: #10b981; }
+    .stat-icon.green { color: #3b82f6; }
     .stat-icon.purple { color: #8b5cf6; }
     .stat-icon.orange { color: #f59e0b; }
     .stat-icon.pink { color: #ec4899; }
@@ -142,9 +142,9 @@ import { CommonModule } from '@angular/common';
     }
 
     .stat-trend.positive {
-      background: rgba(16, 185, 129, 0.1);
-      color: #059669;
-      border: 1px solid rgba(16, 185, 129, 0.2);
+      background: rgba(59, 130, 246, 0.1);
+      color: #2563eb;
+      border: 1px solid rgba(59, 130, 246, 0.2);
     }
 
     .stat-trend.negative {
@@ -211,7 +211,7 @@ import { CommonModule } from '@angular/common';
 
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--primary-500, #10b981), var(--primary-600, #059669));
+      background: linear-gradient(90deg, var(--primary-500, #3b82f6), var(--primary-600, #2563eb));
       border-radius: 3px;
       transition: width 1s ease-out;
     }
@@ -224,13 +224,13 @@ import { CommonModule } from '@angular/common';
 
     .stat-sparkline {
       height: 40px;
-      color: var(--primary-500, #10b981);
+      color: var(--primary-500, #3b82f6);
       opacity: 0.7;
     }
 
     /* Theme variations */
     .theme-primary .modern-stat-card::before {
-      background: linear-gradient(90deg, #10b981, #059669);
+      background: linear-gradient(90deg, #3b82f6, #2563eb);
     }
 
     .theme-blue .modern-stat-card::before {

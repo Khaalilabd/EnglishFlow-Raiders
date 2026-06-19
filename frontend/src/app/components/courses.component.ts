@@ -289,7 +289,7 @@ import { ModernStatsCardComponent } from './modern-stats-card.component';
       align-items: center;
       gap: 8px;
       padding: 12px 24px;
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
       color: white;
       border: none;
       border-radius: 12px;
@@ -338,7 +338,7 @@ import { ModernStatsCardComponent } from './modern-stats-card.component';
 
     .filter-select:focus {
       outline: none;
-      border-color: #10b981;
+      border-color: #3b82f6;
       box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
     }
 
@@ -401,7 +401,7 @@ import { ModernStatsCardComponent } from './modern-stats-card.component';
     .modal-icon {
       width: 48px;
       height: 48px;
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
       border-radius: 12px;
       display: flex;
       align-items: center;
@@ -471,7 +471,7 @@ import { ModernStatsCardComponent } from './modern-stats-card.component';
 
     .form-input:focus {
       outline: none;
-      border-color: #10b981;
+      border-color: #3b82f6;
       box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
     }
 
@@ -555,7 +555,7 @@ import { ModernStatsCardComponent } from './modern-stats-card.component';
 
     .success-toast {
       background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-      color: #059669;
+      color: #2563eb;
       border: 1px solid rgba(16, 185, 129, 0.2);
     }
 

@@ -9,9 +9,7 @@ Application frontend Angular moderne avec Nginx pour l'architecture microservice
 - ✅ Dashboard avec statistiques
 - ✅ CRUD Courses
 - ✅ CRUD Students
-- ✅ CRUD Clubs
 - ✅ CRUD Quiz
-- ✅ Gestion des réclamations
 - ✅ Charts et graphiques (Chart.js)
 - ✅ Routing Angular
 - ✅ Standalone Components
@@ -36,9 +34,7 @@ Application frontend Angular moderne avec Nginx pour l'architecture microservice
 - `/dashboard` - Vue d'ensemble
 - `/courses` - Gestion des cours
 - `/students` - Gestion des étudiants
-- `/clubs` - Gestion des clubs
 - `/quiz` - Gestion des quiz
-- `/complaints` - Réclamations
 
 ## 🚀 Démarrage
 
@@ -147,19 +143,10 @@ POST /api/students
 PUT /api/students/{id}
 DELETE /api/students/{id}
 
-// Clubs
-GET /api/clubs
-POST /api/clubs
-POST /api/clubs/{id}/join
-
 // Quiz
 GET /api/quiz
 POST /api/quiz
 POST /api/quiz/{id}/submit
-
-// Complaints
-GET /api/complaints
-POST /api/complaints
 ```
 
 ## 🐛 Troubleshooting

@@ -113,11 +113,6 @@ wait_for_log student-service "Started StudentServiceApplication" 90
 docker-compose up -d --build courses-service
 wait_for_log courses-service "Started CoursesServiceApplication" 90
 
-docker-compose up -d --build complaints-service
-wait_for_log complaints-service "Started ComplaintsServiceApplication" 90
-
-docker-compose up -d --build clubs-service
-wait_for_log clubs-service "Started ClubsServiceApplication" 90
 
 docker-compose up -d --build quiz-service
 wait_for_log quiz-service "Started QuizServiceApplication" 90

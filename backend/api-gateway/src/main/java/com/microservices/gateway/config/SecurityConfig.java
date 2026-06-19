@@ -32,14 +32,11 @@ import java.util.stream.Collectors;
  *  PUBLIC  (no token required):
  *    - POST /api/auth/**          → login, register, refresh
  *    - GET  /api/courses/**       → browse courses
- *    - GET  /api/clubs/**         → browse clubs
  *    - GET  /api/quizzes/**       → browse quizzes
  *    - /actuator/**               → health checks
  *
  *  STUDENT / TUTOR / ADMIN  (any authenticated user):
  *    - GET  /api/students/**      → own profile
- *    - POST /api/complaints/**    → submit a complaint
- *    - GET  /api/complaints/**    → view complaints
  *    - POST /api/enrollments/**   → enroll in a course
  *
  *  TUTOR or ADMIN:
@@ -52,8 +49,6 @@ import java.util.stream.Collectors;
  *  ADMIN only:
  *    - /api/students/admin/**     → manage all students
  *    - DELETE /api/students/**    → delete a student
- *    - DELETE /api/complaints/**  → delete a complaint
- *    - DELETE /api/clubs/**       → delete a club
  *    - DELETE /api/quizzes/**     → delete a quiz
  */
 @Configuration
@@ -79,14 +74,11 @@ public class SecurityConfig {
 
                 // Public read-only access
                 .pathMatchers("GET", "/api/courses/**").permitAll()
-                .pathMatchers("GET", "/api/clubs/**").permitAll()
                 .pathMatchers("GET", "/api/quizzes/**").permitAll()
 
                 // ── ADMIN-only endpoints ──────────────────────────────────────
                 .pathMatchers("/api/students/admin/**").hasRole("ADMIN")
                 .pathMatchers("DELETE", "/api/students/**").hasRole("ADMIN")
-                .pathMatchers("DELETE", "/api/complaints/**").hasRole("ADMIN")
-                .pathMatchers("DELETE", "/api/clubs/**").hasRole("ADMIN")
                 .pathMatchers("DELETE", "/api/quizzes/**").hasRole("ADMIN")
 
                 // ── TUTOR or ADMIN endpoints ──────────────────────────────────
@@ -98,10 +90,7 @@ public class SecurityConfig {
 
                 // ── Any authenticated user ────────────────────────────────────
                 .pathMatchers("/api/students/**").authenticated()
-                .pathMatchers("/api/complaints/**").authenticated()
                 .pathMatchers("/api/enrollments/**").authenticated()
-                .pathMatchers("POST", "/api/clubs/**").authenticated()
-                .pathMatchers("PUT", "/api/clubs/**").authenticated()
 
                 // Deny everything else by default
                 .anyExchange().authenticated()

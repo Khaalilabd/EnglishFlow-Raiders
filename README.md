@@ -139,12 +139,9 @@ make logs
 - **API Gateway (8080)** - Routage et load balancing
 
 ### Business Services
-- **Auth Service (8081)** - Authentification Java
 - **Auth Service Node (3001)** - Authentification Node.js
 - **Courses Service (8082)** - Gestion des cours
 - **Student Service (8083)** - Gestion des étudiants
-- **Complaints Service (8084)** - Gestion des réclamations
-- **Clubs Service (8085)** - Gestion des clubs
 - **Quiz Service (8086)** - Gestion des quiz
 
 ### Frontend
@@ -275,12 +272,9 @@ microservices/
 │   ├── config-server/       # Configuration centralisée
 │   ├── eureka-server/        # Service Discovery
 │   ├── api-gateway/          # API Gateway
-│   ├── auth-service/         # Auth Java
 │   ├── auth-service-node/    # Auth Node.js
 │   ├── courses-service/      # Gestion cours
 │   ├── student-service/      # Gestion étudiants
-│   ├── complaints-service/   # Gestion réclamations
-│   ├── clubs-service/        # Gestion clubs
 │   └── quiz-service/         # Gestion quiz
 ├── frontend/                 # Application Angular
 ├── docker/                   # Scripts SQL init

@@ -72,7 +72,7 @@ start-gateway: ## Démarrer l'API Gateway
 
 start-services: ## Démarrer tous les services business
 	@echo "$(GREEN)Démarrage des services business...$(NC)"
-	@docker-compose up -d --build auth-service student-service courses-service complaints-service clubs-service quiz-service
+	@docker-compose up -d --build student-service courses-service quiz-service
 
 start-frontend: ## Démarrer le frontend
 	@docker-compose up -d --build frontend
@@ -87,20 +87,11 @@ logs-eureka: ## Logs d'Eureka
 logs-config: ## Logs du Config Server
 	@docker-compose logs -f config-server
 
-logs-auth: ## Logs du Auth Service
-	@docker-compose logs -f auth-service
-
 logs-student: ## Logs du Student Service
 	@docker-compose logs -f student-service
 
 logs-courses: ## Logs du Courses Service
 	@docker-compose logs -f courses-service
-
-logs-complaints: ## Logs du Complaints Service
-	@docker-compose logs -f complaints-service
-
-logs-clubs: ## Logs du Clubs Service
-	@docker-compose logs -f clubs-service
 
 logs-quiz: ## Logs du Quiz Service
 	@docker-compose logs -f quiz-service

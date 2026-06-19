@@ -290,8 +290,8 @@ export interface TableAction {
 
     .search-input:focus {
       outline: none;
-      border-color: #10b981;
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
 
     .clear-search {
@@ -324,7 +324,7 @@ export interface TableAction {
       width: 40px;
       height: 40px;
       border: 3px solid #f3f4f6;
-      border-top-color: #10b981;
+      border-top-color: #3b82f6;
       border-radius: 50%;
       animation: spin 1s linear infinite;
       margin-bottom: 16px;
@@ -384,7 +384,7 @@ export interface TableAction {
     }
 
     .modern-table th.sortable:hover {
-      background: rgba(16, 185, 129, 0.05);
+      background: rgba(59, 130, 246, 0.05);
     }
 
     .th-content {
@@ -400,7 +400,7 @@ export interface TableAction {
 
     .sort-indicator.active {
       opacity: 1;
-      color: #10b981;
+      color: #3b82f6;
     }
 
     .sort-indicator.desc {
@@ -420,12 +420,12 @@ export interface TableAction {
     }
 
     .table-row:hover {
-      background: linear-gradient(135deg, #f9fafb 0%, rgba(16, 185, 129, 0.02) 100%);
+      background: linear-gradient(135deg, #f9fafb 0%, rgba(59, 130, 246, 0.02) 100%);
     }
 
     .table-row.selected {
-      background: rgba(16, 185, 129, 0.05);
-      border-left: 4px solid #10b981;
+      background: rgba(59, 130, 246, 0.05);
+      border-left: 4px solid #3b82f6;
     }
 
     .align-left { text-align: left; }
@@ -446,7 +446,7 @@ export interface TableAction {
       letter-spacing: 0.05em;
     }
 
-    .badge-success { background: #ecfdf5; color: #059669; }
+    .badge-success { background: #ecfdf5; color: #2563eb; }
     .badge-warning { background: #fffbeb; color: #d97706; }
     .badge-danger { background: #fef2f2; color: #dc2626; }
     .badge-info { background: #eff6ff; color: #2563eb; }
@@ -477,7 +477,7 @@ export interface TableAction {
     .btn-secondary { background: #f3f4f6; color: #6b7280; }
     .btn-secondary:hover { background: #e5e7eb; }
 
-    .btn-success { background: #ecfdf5; color: #059669; }
+    .btn-success { background: #ecfdf5; color: #2563eb; }
     .btn-success:hover { background: #d1fae5; }
 
     .btn-warning { background: #fffbeb; color: #d97706; }
@@ -537,8 +537,8 @@ export interface TableAction {
     }
 
     .page-btn.active {
-      background: #10b981;
-      border-color: #10b981;
+      background: #3b82f6;
+      border-color: #3b82f6;
       color: white;
     }
 

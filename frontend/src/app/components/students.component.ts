@@ -387,7 +387,7 @@ import { ModernDataTableComponent, TableColumn, TableAction } from './modern-dat
       align-items: center;
       justify-content: center;
       background: linear-gradient(135deg, #ecfdf5, #d1fae5);
-      color: #059669;
+      color: #2563eb;
       flex-shrink: 0;
     }
 
@@ -490,7 +490,7 @@ import { ModernDataTableComponent, TableColumn, TableAction } from './modern-dat
 
     .form-input:focus {
       outline: none;
-      border-color: #10b981;
+      border-color: #3b82f6;
       box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
     }
 
@@ -509,7 +509,7 @@ import { ModernDataTableComponent, TableColumn, TableAction } from './modern-dat
       align-items: center;
       gap: 8px;
       padding: 12px 20px;
-      background: linear-gradient(135deg, #10b981, #059669);
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
       color: white;
       border: none;
       border-radius: 12px;
@@ -607,7 +607,7 @@ import { ModernDataTableComponent, TableColumn, TableAction } from './modern-dat
     }
 
     .success-toast {
-      background: linear-gradient(135deg, #10b981, #059669);
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
       color: white;
     }
 

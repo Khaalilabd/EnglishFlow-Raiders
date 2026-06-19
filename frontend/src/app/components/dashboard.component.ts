@@ -124,7 +124,7 @@ Chart.register(...registerables);
         <app-modern-stats-card
           title="Services actifs"
           [value]="servicesUp"
-          suffix="/8"
+          suffix="/6"
           iconColor="orange"
           theme="orange"
           trend="neutral"
@@ -133,36 +133,6 @@ Chart.register(...registerables);
           <svg slot="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"/>
             <polyline points="12 6 12 12 16 14"/>
-          </svg>
-        </app-modern-stats-card>
-
-        <app-modern-stats-card
-          title="Clubs actifs"
-          [value]="totalClubs"
-          iconColor="pink"
-          theme="pink"
-          trend="up"
-          [trendValue]="15"
-          [sparklineData]="clubsSparkline"
-        >
-          <svg slot="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-          </svg>
-        </app-modern-stats-card>
-
-        <app-modern-stats-card
-          title="Réclamations"
-          [value]="totalComplaints"
-          iconColor="red"
-          theme="red"
-          trend="up"
-          [trendValue]="5"
-        >
-          <svg slot="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
           </svg>
         </app-modern-stats-card>
 
@@ -220,7 +190,6 @@ Chart.register(...registerables);
             <select class="chart-filter">
               <option>Tous</option>
               <option>Cours</option>
-              <option>Clubs</option>
             </select>
           </div>
           <div class="chart-container">
@@ -323,22 +292,7 @@ Chart.register(...registerables);
               </div>
             </button>
 
-            @if (!isTutor()) {
-              <button class="quick-action-btn" (click)="navigate('clubs')">
-                <div class="quick-action-icon orange">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                    <circle cx="9" cy="7" r="4"/>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                  </svg>
-                </div>
-                <div class="quick-action-text">
-                  <h4>Rejoindre un club</h4>
-                  <p>Communauté d'apprentissage</p>
-                </div>
-              </button>
-            }
+
           </div>
         </div>
       </div>
@@ -444,41 +398,6 @@ Chart.register(...registerables);
           <div class="service-item">
             <div class="service-icon">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              </svg>
-            </div>
-            <div class="service-info">
-              <h4>Complaints Service</h4>
-              <p>Feedback Management</p>
-            </div>
-            <div class="service-status active">
-              <span></span>
-              Active
-            </div>
-          </div>
-
-          <div class="service-item">
-            <div class="service-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-              </svg>
-            </div>
-            <div class="service-info">
-              <h4>Clubs Service</h4>
-              <p>Community Management</p>
-            </div>
-            <div class="service-status active">
-              <span></span>
-              Active
-            </div>
-          </div>
-
-          <div class="service-item">
-            <div class="service-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M9 11l3 3L22 4"/>
                 <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
               </svg>
@@ -499,7 +418,7 @@ Chart.register(...registerables);
   styles: [`
     .dashboard-container {
       min-height: calc(100vh - 56px);
-      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
       padding: 24px 28px;
       position: relative;
     }
@@ -510,8 +429,8 @@ Chart.register(...registerables);
       top: 0;
       left: 0;
       right: 0;
-      height: 200px;
-      background: linear-gradient(135deg, rgba(16,185,129,0.05) 0%, rgba(59,130,246,0.05) 100%);
+      height: 220px;
+      background: linear-gradient(135deg, rgba(59,130,246,0.06) 0%, rgba(139,92,246,0.06) 100%);
       border-radius: 0 0 50px 50px;
       z-index: 0;
     }
@@ -544,7 +463,7 @@ Chart.register(...registerables);
     .user-avatar {
       width: 64px;
       height: 64px;
-      background: linear-gradient(135deg, #10b981, #059669);
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
       border-radius: 20px;
       display: flex;
       align-items: center;
@@ -552,7 +471,7 @@ Chart.register(...registerables);
       color: white;
       font-weight: 700;
       font-size: 24px;
-      box-shadow: 0 8px 24px rgba(16,185,129,0.3);
+      box-shadow: 0 8px 24px rgba(59,130,246,0.3);
       position: relative;
       overflow: hidden;
     }
@@ -576,7 +495,7 @@ Chart.register(...registerables);
       right: 4px;
       width: 16px;
       height: 16px;
-      background: #10b981;
+      background: #22c55e;
       border: 3px solid white;
       border-radius: 50%;
       animation: pulse 2s infinite;
@@ -618,7 +537,7 @@ Chart.register(...registerables);
     }
 
     .stat-item svg {
-      color: #10b981;
+      color: #3b82f6;
     }
 
     .header-actions { 
@@ -673,13 +592,13 @@ Chart.register(...registerables);
     }
 
     .action-btn.primary {
-      background: linear-gradient(135deg, #10b981, #059669);
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
       color: white;
-      box-shadow: 0 8px 20px rgba(16,185,129,.3);
+      box-shadow: 0 8px 20px rgba(59,130,246,.3);
     }
     .action-btn.primary:hover { 
       transform: translateY(-2px);
-      box-shadow: 0 12px 25px rgba(16,185,129,.4);
+      box-shadow: 0 12px 25px rgba(59,130,246,.4);
     }
 
     /* Stats Grid */
@@ -726,8 +645,8 @@ Chart.register(...registerables);
     }
     .chart-filter:focus { 
       outline: none; 
-      border-color: #10b981; 
-      box-shadow: 0 0 0 3px rgba(16,185,129,0.1);
+      border-color: #3b82f6; 
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
     }
 
     /* Cards */
@@ -823,7 +742,7 @@ Chart.register(...registerables);
       z-index: 1;
     }
     .timeline-marker.blue   { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-    .timeline-marker.green  { background: linear-gradient(135deg, #10b981, #059669); }
+    .timeline-marker.green  { background: linear-gradient(135deg, #22c55e, #16a34a); }
     .timeline-marker.purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
 
     .timeline-content { flex: 1; }
@@ -903,7 +822,7 @@ Chart.register(...registerables);
     }
 
     .quick-action-icon.blue   { color: #3b82f6; }
-    .quick-action-icon.green  { color: #10b981; }
+    .quick-action-icon.green  { color: #22c55e; }
     .quick-action-icon.purple { color: #8b5cf6; }
     .quick-action-icon.orange { color: #f59e0b; }
     .quick-action-icon.red    { color: #ef4444; }
@@ -930,19 +849,19 @@ Chart.register(...registerables);
       align-items: center;
       gap: 8px;
       padding: 8px 16px;
-      background: rgba(236,253,245,0.8);
-      border: 1px solid rgba(167,243,208,0.6);
+      background: rgba(219,234,254,0.8);
+      border: 1px solid rgba(147,197,253,0.6);
       border-radius: 20px;
       font-size: 13px;
       font-weight: 600;
-      color: #059669;
+      color: #2563eb;
       backdrop-filter: blur(10px);
     }
 
     .status-dot {
       width: 8px;
       height: 8px;
-      background: #10b981;
+      background: #3b82f6;
       border-radius: 50%;
       animation: pulse 2s infinite;
     }
@@ -974,12 +893,12 @@ Chart.register(...registerables);
     .service-icon {
       width: 48px;
       height: 48px;
-      background: rgba(236,253,245,0.8);
+      background: rgba(219,234,254,0.6);
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #10b981;
+      color: #3b82f6;
       flex-shrink: 0;
     }
 
@@ -1006,20 +925,20 @@ Chart.register(...registerables);
       font-weight: 600;
     }
     .service-status.active { 
-      background: rgba(236,253,245,0.8); 
-      color: #059669; 
+      background: rgba(219,234,254,0.6); 
+      color: #2563eb; 
     }
     .service-status span { 
       width: 6px; 
       height: 6px; 
-      background: #10b981; 
+      background: #3b82f6; 
       border-radius: 50%; 
     }
 
     /* Theme variations */
     .theme-admin {
-      --primary-color: #dc2626;
-      --primary-light: #fef2f2;
+      --primary-color: #7c3aed;
+      --primary-light: #f5f3ff;
     }
 
     .theme-tutor {
@@ -1028,8 +947,8 @@ Chart.register(...registerables);
     }
 
     .theme-student {
-      --primary-color: #059669;
-      --primary-light: #ecfdf5;
+      --primary-color: #0ea5e9;
+      --primary-light: #f0f9ff;
     }
 
     /* Responsive */
@@ -1058,10 +977,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   totalCourses = 0;
   totalStudents = 0;
   totalEnrollments = 0;
-  totalClubs = 0;
-  totalComplaints = 0;
   totalQuizzes = 0;
-  servicesUp = 8;
+  servicesUp = 6;
   userName = '';
   userRole = '';
 
@@ -1069,7 +986,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   coursesSparkline: number[] = [12, 19, 15, 27, 22, 35, 28];
   studentsSparkline: number[] = [8, 15, 12, 20, 18, 25, 22];
   enrollmentsSparkline: number[] = [5, 12, 8, 18, 15, 22, 20];
-  clubsSparkline: number[] = [3, 8, 6, 12, 10, 15, 13];
 
   constructor(
     private http: HttpClient,
@@ -1123,28 +1039,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       error: (err) => {
         console.error('Error loading enrollments:', err);
         this.totalEnrollments = 0;
-      }
-    });
-
-    // Charger les clubs
-    this.http.get<any[]>('http://localhost:8080/clubs-service/api/clubs').subscribe({
-      next: (data) => {
-        this.totalClubs = data.length;
-      },
-      error: (err) => {
-        console.error('Error loading clubs:', err);
-        this.totalClubs = 0;
-      }
-    });
-
-    // Charger les réclamations
-    this.http.get<any[]>('http://localhost:8080/complaints-service/api/complaints').subscribe({
-      next: (data) => {
-        this.totalComplaints = data.length;
-      },
-      error: (err) => {
-        console.error('Error loading complaints:', err);
-        this.totalComplaints = 0;
       }
     });
 
@@ -1209,7 +1103,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       case 'STUDENT':
         return greeting + ' ! Continuez votre parcours d\'apprentissage.';
       default:
-        return greeting + ' ! Voici un aperçu de votre activité sur EnglishFlow.';
+        return greeting + ' ! Voici un aperçu de votre activité sur Gestion d\'école.';
     }
   }
 
@@ -1247,8 +1141,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       courses: this.totalCourses,
       students: this.totalStudents,
       enrollments: this.totalEnrollments,
-      clubs: this.totalClubs,
-      complaints: this.totalComplaints,
+
       quizzes: this.totalQuizzes,
       exportDate: new Date().toISOString()
     };
@@ -1276,11 +1169,11 @@ export class DashboardComponent implements OnInit, AfterViewInit {
           {
             label: 'Inscriptions',
             data: [12, 19, 15, 27, 22, 35, 28],
-            borderColor: '#10b981',
-            backgroundColor: 'rgba(16,185,129,.1)',
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59,130,246,.1)',
             tension: 0.4,
             fill: true,
-            pointBackgroundColor: '#10b981',
+            pointBackgroundColor: '#3b82f6',
             pointBorderColor: '#fff',
             pointBorderWidth: 2,
             pointRadius: 4,
@@ -1338,14 +1231,13 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.categoryChart = new Chart(ctx, {
       type: 'doughnut',
       data: {
-        labels: ['Cours', 'Étudiants', 'Clubs', 'Quiz'],
+        labels: ['Cours', 'Étudiants', 'Quiz'],
         datasets: [
           {
-            data: [this.totalCourses, this.totalStudents, this.totalClubs, this.totalQuizzes],
+            data: [this.totalCourses, this.totalStudents, this.totalQuizzes],
             backgroundColor: [
               '#3b82f6',
-              '#10b981',
-              '#f59e0b',
+              '#22c55e',
               '#8b5cf6'
             ],
             borderWidth: 0,

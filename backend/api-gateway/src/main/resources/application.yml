@@ -18,17 +18,9 @@ spring:
           lower-case-service-id: true
       routes:
         - id: auth-service
-          uri: lb://auth-service
+          uri: lb://auth-service-node
           predicates:
             - Path=/api/auth/**
-
-        # Swagger for auth-service
-        - id: auth-service-swagger
-          uri: lb://auth-service
-          predicates:
-            - Path=/auth-service/v3/api-docs
-          filters:
-            - RewritePath=/auth-service/v3/api-docs, /v3/api-docs
 
         - id: courses-service
           uri: lb://courses-service
@@ -78,48 +70,6 @@ spring:
             - Path=/api/enrollments/**
           filters:
             - RewritePath=/api/enrollments, /api/students/enrollments
-
-        - id: complaints-service
-          uri: lb://complaints-service
-          predicates:
-            - Path=/api/complaints/**
-
-        # Route de compatibilité frontend (complaints-service/api/complaints)
-        - id: complaints-service-compat
-          uri: lb://complaints-service
-          predicates:
-            - Path=/complaints-service/**
-          filters:
-            - RewritePath=/complaints-service/(?<segment>.*), /${segment}
-
-        # Swagger for complaints-service
-        - id: complaints-service-swagger
-          uri: lb://complaints-service
-          predicates:
-            - Path=/complaints-service/v3/api-docs
-          filters:
-            - RewritePath=/complaints-service/v3/api-docs, /v3/api-docs
-
-        - id: clubs-service
-          uri: lb://clubs-service
-          predicates:
-            - Path=/api/clubs/**
-
-        # Route de compatibilité frontend (clubs-service/api/clubs)
-        - id: clubs-service-compat
-          uri: lb://clubs-service
-          predicates:
-            - Path=/clubs-service/**
-          filters:
-            - RewritePath=/clubs-service/(?<segment>.*), /${segment}
-
-        # Swagger for clubs-service
-        - id: clubs-service-swagger
-          uri: lb://clubs-service
-          predicates:
-            - Path=/clubs-service/v3/api-docs
-          filters:
-            - RewritePath=/clubs-service/v3/api-docs, /v3/api-docs
 
         - id: quiz-service
           uri: lb://quiz-service
@@ -175,16 +125,11 @@ springdoc:
     path: /swagger-ui.html
     config-url: /v3/api-docs/swagger-config
     urls:
-      - name: auth-service
-        url: /auth-service/v3/api-docs
       - name: courses-service
         url: /courses-service/v3/api-docs
       - name: students-service
         url: /students-service/v3/api-docs
-      - name: complaints-service
-        url: /complaints-service/v3/api-docs
-      - name: clubs-service
-        url: /clubs-service/v3/api-docs
+
       - name: quiz-service
         url: /quiz-service/v3/api-docs
   api-docs:

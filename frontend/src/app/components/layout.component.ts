@@ -38,7 +38,7 @@ import { NavbarComponent } from './navbar.component';
     .main-app {
       display: flex;
       min-height: 100vh;
-      background: #f4f5f7;
+      background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
     }
 
     .content {

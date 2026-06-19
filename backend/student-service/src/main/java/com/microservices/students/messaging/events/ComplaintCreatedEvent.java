@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  * 
  * Exchange : complaint.exchange
  * Routing  : complaint.created
- * Publisher: complaints-service
+ * Publisher: (removed - complaints-service was deleted)
  */
 @Data
 @NoArgsConstructor

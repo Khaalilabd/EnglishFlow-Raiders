@@ -276,7 +276,7 @@ import { AuthService } from '../services/auth.service';
           <div class="modal-header">
             <div class="modal-title">
               <div class="modal-icon" [style.background]="selectedResult?.passed ? '#d1fae5' : '#fee2e2'">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" [attr.stroke]="selectedResult?.passed ? '#10b981' : '#ef4444'" stroke-width="2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" [attr.stroke]="selectedResult?.passed ? '#3b82f6' : '#ef4444'" stroke-width="2">
                   <path *ngIf="selectedResult?.passed" d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline *ngIf="selectedResult?.passed" points="22 4 12 14.01 9 11.01"/>
                   <circle *ngIf="!selectedResult?.passed" cx="12" cy="12" r="10"/><line *ngIf="!selectedResult?.passed" x1="15" y1="9" x2="9" y2="15"/><line *ngIf="!selectedResult?.passed" x1="9" y1="9" x2="15" y2="15"/>
                 </svg>
@@ -299,16 +299,16 @@ import { AuthService } from '../services/auth.service';
             </div>
             <div *ngIf="!loadingResult && selectedResult">
               <div style="text-align:center;margin-bottom:24px">
-                <div style="font-size:64px;font-weight:800;line-height:1" [style.color]="selectedResult.passed ? '#10b981' : '#ef4444'">
+                <div style="font-size:64px;font-weight:800;line-height:1" [style.color]="selectedResult.passed ? '#3b82f6' : '#ef4444'">
                   {{ selectedResult.score }}%
                 </div>
-                <div style="margin-top:8px;font-size:18px;font-weight:600" [style.color]="selectedResult.passed ? '#10b981' : '#ef4444'">
+                <div style="margin-top:8px;font-size:18px;font-weight:600" [style.color]="selectedResult.passed ? '#3b82f6' : '#ef4444'">
                   {{ selectedResult.passed ? '✓ Quiz réussi !' : '✗ Quiz échoué' }}
                 </div>
               </div>
               <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px">
                 <div style="background:#f0fdf4;border-radius:10px;padding:14px;text-align:center">
-                  <div style="font-size:24px;font-weight:700;color:#10b981">{{ selectedResult.correctAnswers }}</div>
+                  <div style="font-size:24px;font-weight:700;color:#3b82f6">{{ selectedResult.correctAnswers }}</div>
                   <div style="font-size:12px;color:#6b7280;margin-top:4px">Bonnes réponses</div>
                 </div>
                 <div style="background:#fef2f2;border-radius:10px;padding:14px;text-align:center">
@@ -1053,7 +1053,7 @@ import { AuthService } from '../services/auth.service';
 
     /* Search input animation when typing */
     .search-input:not(:placeholder-shown) {
-      border-color: #10b981;
+      border-color: #3b82f6;
       background: linear-gradient(135deg, #ffffff, #f0fdf4);
     }
 
@@ -1615,7 +1615,7 @@ import { AuthService } from '../services/auth.service';
 
     .option-preview.correct {
       background: linear-gradient(135deg, #ecfdf5, #d1fae5);
-      border: 1px solid #10b981;
+      border: 1px solid #3b82f6;
     }
 
     .option-letter {
@@ -1633,7 +1633,7 @@ import { AuthService } from '../services/auth.service';
     }
 
     .option-preview.correct .option-letter {
-      background: #10b981;
+      background: #3b82f6;
     }
 
     .option-text {
@@ -1642,7 +1642,7 @@ import { AuthService } from '../services/auth.service';
     }
 
     .correct-badge {
-      color: #10b981;
+      color: #3b82f6;
       font-weight: 600;
     }
 
@@ -1711,8 +1711,8 @@ import { AuthService } from '../services/auth.service';
     }
 
     .progress-step.completed .step-circle {
-      border-color: #10b981;
-      background: #10b981;
+      border-color: #3b82f6;
+      background: #3b82f6;
     }
 
     .step-label {
@@ -1729,7 +1729,7 @@ import { AuthService } from '../services/auth.service';
     }
 
     .progress-line.completed {
-      background: #10b981;
+      background: #3b82f6;
     }
 
     .wizard-content {
@@ -1910,9 +1910,9 @@ import { AuthService } from '../services/auth.service';
       gap: 12px;
       padding: 16px 24px;
       background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
-      border: 2px dashed #10b981;
+      border: 2px dashed #3b82f6;
       border-radius: 16px;
-      color: #059669;
+      color: #2563eb;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s;

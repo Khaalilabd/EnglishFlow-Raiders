@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  * 
  * Exchange : student.exchange
  * Routing  : student.enrolled
- * Consumers: clubs-service (to suggest relevant clubs)
+ * Consumers: (none currently)
  */
 @Data
 @NoArgsConstructor

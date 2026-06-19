@@ -186,13 +186,14 @@ export class KeycloakService {
 
   private async getAdminToken(): Promise<string> {
     try {
-      // Option 1: Essayer avec le client actuel (si configuré avec service account)
+      // Essayer avec le realm master (admin-cli) - fiable, accès complet
       const response = await axios.post(
-        `${this.baseUrl}/realms/${this.realm}/protocol/openid-connect/token`,
+        `${this.baseUrl}/realms/master/protocol/openid-connect/token`,
         new URLSearchParams({
-          grant_type: 'client_credentials',
-          client_id: this.clientId,
-          client_secret: this.clientSecret,
+          grant_type: 'password',
+          client_id: 'admin-cli',
+          username: process.env.KEYCLOAK_ADMIN_USERNAME || 'admin',
+          password: process.env.KEYCLOAK_ADMIN_PASSWORD || 'admin',
         }),
         {
           headers: {
@@ -200,20 +201,18 @@ export class KeycloakService {
           },
         }
       );
-
       return response.data.access_token;
-    } catch (error: any) {
-      console.error('Failed to get admin token with client_credentials:', error.response?.data || error.message);
+    } catch (masterError: any) {
+      console.error('Failed to get admin token from master realm:', masterError.response?.data || masterError.message);
       
-      // Option 2: Essayer avec le realm master (fallback)
+      // Fallback: essayer avec le client actuel
       try {
         const response = await axios.post(
-          `${this.baseUrl}/realms/master/protocol/openid-connect/token`,
+          `${this.baseUrl}/realms/${this.realm}/protocol/openid-connect/token`,
           new URLSearchParams({
-            grant_type: 'password',
-            client_id: 'admin-cli',
-            username: process.env.KEYCLOAK_ADMIN_USERNAME || 'admin',
-            password: process.env.KEYCLOAK_ADMIN_PASSWORD || 'admin',
+            grant_type: 'client_credentials',
+            client_id: this.clientId,
+            client_secret: this.clientSecret,
           }),
           {
             headers: {
@@ -221,12 +220,29 @@ export class KeycloakService {
             },
           }
         );
-
         return response.data.access_token;
-      } catch (masterError: any) {
-        console.error('Failed to get admin token from master realm:', masterError.response?.data || masterError.message);
-        throw new Error('Unable to obtain admin token. Please configure Keycloak admin credentials.');
+      } catch (error: any) {
+        console.error('Failed to get admin token with client_credentials:', error.response?.data || error.message);
+        throw new Error('Unable to obtain admin token.');
       }
+    }
+  }
+
+  async getUserRealmRoles(keycloakId: string): Promise<string[]> {
+    try {
+      const adminToken = await this.getAdminToken();
+      const response = await axios.get(
+        `${this.baseUrl}/admin/realms/${this.realm}/users/${keycloakId}/role-mappings/realm`,
+        {
+          headers: {
+            Authorization: `Bearer ${adminToken}`,
+          },
+        }
+      );
+      return (response.data as any[]).map((r: any) => r.name);
+    } catch (error: any) {
+      console.error('Failed to get user realm roles:', error.response?.data || error.message);
+      return [];
     }
   }
 

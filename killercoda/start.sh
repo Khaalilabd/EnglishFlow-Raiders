@@ -5,7 +5,7 @@
 # ============================================================
 
 echo "========================================"
-echo "  Microservices - EnglishFlow Raiders"
+  echo "  Microservices - Gestion d'école"
 echo "  Déploiement Killercoda"
 echo "========================================"
 
@@ -36,7 +36,7 @@ sleep 30
 
 # Étape 3 : Services métier
 echo "  [3/4] Démarrage services métier..."
-docker compose up -d api-gateway auth-service-node courses-service student-service complaints-service clubs-service quiz-service frontend
+docker compose up -d api-gateway auth-service-node courses-service student-service quiz-service frontend
 echo "  ⏳ Attente démarrage services (40s)..."
 sleep 40
 

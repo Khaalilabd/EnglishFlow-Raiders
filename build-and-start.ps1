@@ -147,14 +147,6 @@ Write-Info "Démarrage du Courses Service..."
 docker-compose up -d --build courses-service
 Wait-ForLog -Service "courses-service" -Message "Started CoursesServiceApplication" -MaxAttempts 90
 
-Write-Info "Démarrage du Complaints Service..."
-docker-compose up -d --build complaints-service
-Wait-ForLog -Service "complaints-service" -Message "Started ComplaintsServiceApplication" -MaxAttempts 90
-
-Write-Info "Démarrage du Clubs Service..."
-docker-compose up -d --build clubs-service
-Wait-ForLog -Service "clubs-service" -Message "Started ClubsServiceApplication" -MaxAttempts 90
-
 Write-Info "Démarrage du Quiz Service..."
 docker-compose up -d --build quiz-service
 Wait-ForLog -Service "quiz-service" -Message "Started QuizServiceApplication" -MaxAttempts 90

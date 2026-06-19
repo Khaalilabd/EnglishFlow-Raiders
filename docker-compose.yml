@@ -144,6 +144,7 @@ services:
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       SPRING_PROFILES_ACTIVE: docker
+      ZIPKIN_URL: http://zipkin:9411/api/v2/spans
     depends_on:
       eureka-server:
         condition: service_healthy
@@ -170,7 +171,7 @@ services:
       KEYCLOAK_URL: http://keycloak:8080
       KEYCLOAK_REALM: microservices
       KEYCLOAK_CLIENT_ID: microservices-client
-      KEYCLOAK_CLIENT_SECRET: WkyJri4R0QnLhPXKSHt3uiMfiBuP1yfT
+      KEYCLOAK_CLIENT_SECRET: XLqdI3wL8j3ebyQ3zfzYQOfTTfw2m8mi
       KEYCLOAK_ADMIN_USERNAME: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       EUREKA_HOST: eureka-server
@@ -271,64 +272,7 @@ services:
       start_period: 60s
     restart: unless-stopped
 
-  complaints-service:
-    build:
-      context: ./backend/complaints-service
-      dockerfile: Dockerfile
-    container_name: complaints-service
-    ports:
-      - "${COMPLAINTS_SERVICE_PORT:-8084}:8084"
-    environment:
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
-      SPRING_CLOUD_CONFIG_USERNAME: configuser
-      SPRING_CLOUD_CONFIG_PASSWORD: configpass
-    depends_on:
-      config-server:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
-    networks:
-      - microservices-network
-    healthcheck:
-      test: ["CMD", "sh", "-c", "nc -z localhost 8084 || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    restart: unless-stopped
 
-  clubs-service:
-    build:
-      context: ./backend/clubs-service
-      dockerfile: Dockerfile
-    container_name: clubs-service
-    ports:
-      - "${CLUBS_SERVICE_PORT:-8085}:8085"
-    environment:
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
-      SPRING_CLOUD_CONFIG_USERNAME: configuser
-      SPRING_CLOUD_CONFIG_PASSWORD: configpass
-      SPRING_RABBITMQ_HOST: rabbitmq
-    depends_on:
-      config-server:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
-    networks:
-      - microservices-network
-    healthcheck:
-      test: ["CMD", "sh", "-c", "nc -z localhost 8085 || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    restart: unless-stopped
 
   quiz-service:
     build:
@@ -345,7 +289,13 @@ services:
       SPRING_CLOUD_CONFIG_USERNAME: configuser
       SPRING_CLOUD_CONFIG_PASSWORD: configpass
       SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/quiz_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      ZIPKIN_URL: http://zipkin:9411/api/v2/spans
     depends_on:
+      postgres:
+        condition: service_healthy
       config-server:
         condition: service_healthy
       eureka-server:

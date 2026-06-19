@@ -56,11 +56,8 @@ eureka:
 ## 📊 Services Enregistrés
 - config-server
 - api-gateway
-- auth-service
 - courses-service
 - student-service
-- complaints-service
-- clubs-service
 - quiz-service
 
 ## 🐳 Docker

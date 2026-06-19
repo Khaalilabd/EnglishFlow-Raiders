@@ -6,6 +6,28 @@ import prisma from '../config/database';
 const keycloakService = new KeycloakService();
 const studentService = new StudentService();
 
+function extractRoleFromToken(token: string): string {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      Buffer.from(base64, 'base64')
+        .toString('utf-8')
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    const decoded = JSON.parse(jsonPayload);
+    const realmRoles: string[] = decoded?.realm_access?.roles || [];
+    if (realmRoles.includes('ADMIN')) return 'ADMIN';
+    if (realmRoles.includes('TUTOR')) return 'TUTOR';
+    if (realmRoles.includes('STUDENT')) return 'STUDENT';
+    return '';
+  } catch {
+    return '';
+  }
+}
+
 export const register = async (req: Request, res: Response) => {
   try {
     const { email, username, password, firstName, lastName } = req.body;
@@ -53,13 +75,33 @@ export const login = async (req: Request, res: Response) => {
     // Récupérer les infos utilisateur depuis Keycloak
     const keycloakUser = await keycloakService.getUserInfo(tokens.accessToken);
 
+    // Extraire le rôle depuis le token JWT Keycloak
+    let role = extractRoleFromToken(tokens.accessToken);
+    console.log('Extracted role from JWT:', role);
+
+    // Si le JWT ne contient pas de rôle reconnu, utiliser l'API Admin Keycloak
+    if (!role) {
+      console.log('Role not found in JWT, fetching from Keycloak Admin API...');
+      try {
+        const realmRoles = await keycloakService.getUserRealmRoles(keycloakUser.sub);
+        console.log('Realm roles from Admin API:', realmRoles);
+        if (realmRoles.includes('ADMIN')) role = 'ADMIN';
+        else if (realmRoles.includes('TUTOR')) role = 'TUTOR';
+        else role = 'STUDENT';
+      } catch (err) {
+        console.error('Failed to fetch roles from Admin API, defaulting to STUDENT');
+        role = 'STUDENT';
+      }
+    }
+
     // Chercher ou créer l'utilisateur dans notre base
     let user = await prisma.user.findUnique({
       where: { username },
     });
 
     if (!user) {
-      // Si l'utilisateur n'existe pas, le créer
+      // Si l'utilisateur n'existe pas, le créer avec le rôle Keycloak
+      console.log('Creating new user with role:', role);
       user = await prisma.user.create({
         data: {
           username,
@@ -67,13 +109,22 @@ export const login = async (req: Request, res: Response) => {
           keycloakId: keycloakUser.sub,
           firstName: keycloakUser.given_name,
           lastName: keycloakUser.family_name,
+          role,
         },
       });
     } else if (!user.keycloakId) {
       // Mettre à jour le keycloakId si nécessaire
+      console.log('Updating keycloakId for existing user');
       user = await prisma.user.update({
         where: { id: user.id },
         data: { keycloakId: keycloakUser.sub },
+      });
+    } else if (user.role !== role) {
+      // Synchroniser le rôle depuis Keycloak
+      console.log('Syncing role from', user.role, 'to', role);
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: { role },
       });
     }
 
@@ -318,8 +369,8 @@ export const approveStudent = async (req: Request, res: Response) => {
     try {
       await studentService.createStudent({
         email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        firstName: user.firstName || user.username || 'Unknown',
+        lastName: user.lastName || 'User',
       });
 
       res.json({ message: 'Student approved successfully' });

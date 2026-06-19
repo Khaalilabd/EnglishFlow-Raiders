@@ -69,28 +69,12 @@ export class AuthService {
     return false;
   }
 
-  canManageClubs(): boolean {
-    return this.isTutorOrAdmin();
-  }
-
-  canViewAllComplaints(): boolean {
-    return this.isTutorOrAdmin();
-  }
-
   canCreateQuiz(): boolean {
     return this.isTutor();
   }
 
   canTakeQuiz(): boolean {
     return this.isStudent();
-  }
-
-  canJoinClubs(): boolean {
-    return this.isStudent();
-  }
-
-  canSubmitComplaints(): boolean {
-    return true; // Tous les utilisateurs peuvent soumettre des réclamations
   }
 
   // Déconnexion
@@ -127,8 +111,6 @@ export class AuthService {
           'Gérer tous les cours',
           'Gérer tous les étudiants',
           'Voir toutes les inscriptions',
-          'Gérer les clubs',
-          'Voir toutes les réclamations',
           'Créer et gérer les quiz'
         ];
       case UserRole.TUTOR:
@@ -136,16 +118,13 @@ export class AuthService {
           'Gérer les cours',
           'Voir les étudiants',
           'Gérer les inscriptions',
-          'Créer des quiz',
-          'Voir les réclamations',
-          'Gérer les clubs'
+          'Créer des quiz'
         ];
       case UserRole.STUDENT:
         return [
           'Voir mes cours',
           'Passer des quiz',
-          'Rejoindre des clubs',
-          'Soumettre des réclamations',
+
           'Voir mon profil'
         ];
       default:

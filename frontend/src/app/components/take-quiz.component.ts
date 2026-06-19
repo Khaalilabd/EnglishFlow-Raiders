@@ -124,7 +124,7 @@ import { ActivatedRoute, Router } from '@angular/router';
     }
 
     .quiz-header {
-      background: #059669;
+      background: #2563eb;
       color: white;
       padding: 40px;
       border-radius: 16px;
@@ -168,7 +168,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
     .progress-fill {
       height: 100%;
-      background: #059669;
+      background: #2563eb;
       transition: width 0.3s ease;
     }
 
@@ -191,7 +191,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
     .question-card h2 {
       margin: 0 0 16px 0;
-      color: #059669;
+      color: #2563eb;
       font-size: 18px;
       font-weight: 600;
     }
@@ -223,13 +223,13 @@ import { ActivatedRoute, Router } from '@angular/router';
     }
 
     .option:hover {
-      border-color: #10b981;
+      border-color: #3b82f6;
       background: #f8f9ff;
     }
 
     .option.selected {
-      border-color: #10b981;
-      background: linear-gradient(135deg, rgba(16,185,129,.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      border-color: #3b82f6;
+      background: linear-gradient(135deg, rgba(59,130,246,.1) 0%, rgba(118, 75, 162, 0.1) 100%);
     }
 
     .option-radio {
@@ -245,8 +245,8 @@ import { ActivatedRoute, Router } from '@angular/router';
     }
 
     .option.selected .option-radio {
-      border-color: #10b981;
-      background: #059669;
+      border-color: #3b82f6;
+      background: #2563eb;
     }
 
     .radio-dot {
@@ -285,7 +285,7 @@ import { ActivatedRoute, Router } from '@angular/router';
     }
 
     .btn-primary {
-      background: #059669;
+      background: #2563eb;
       color: white;
     }
 
@@ -295,7 +295,7 @@ import { ActivatedRoute, Router } from '@angular/router';
     }
 
     .btn-submit {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
       color: #111827;
     }
 
@@ -337,7 +337,7 @@ import { ActivatedRoute, Router } from '@angular/router';
     }
 
     .result-icon.passed {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
       color: #111827;
     }
 
@@ -361,7 +361,7 @@ import { ActivatedRoute, Router } from '@angular/router';
       height: 180px;
       margin: 0 auto;
       border-radius: 50%;
-      background: #059669;
+      background: #2563eb;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -390,7 +390,7 @@ import { ActivatedRoute, Router } from '@angular/router';
     .stat-value {
       font-size: 36px;
       font-weight: 700;
-      color: #059669;
+      color: #2563eb;
     }
 
     .stat-label {

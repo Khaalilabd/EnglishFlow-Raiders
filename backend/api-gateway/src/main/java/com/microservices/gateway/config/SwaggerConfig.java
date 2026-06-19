@@ -18,11 +18,8 @@ import java.util.List;
  * Access: http://localhost:8080/swagger-ui.html
  * 
  * Each service's API docs are grouped by service name:
- *  - Auth Service
  *  - Courses Service
  *  - Students Service
- *  - Complaints Service
- *  - Clubs Service
  *  - Quiz Service
  */
 @Configuration
@@ -36,12 +33,6 @@ public class SwaggerConfig {
     public List<GroupedOpenApi> apis() {
         List<GroupedOpenApi> groups = new ArrayList<>();
         
-        // Auth Service
-        groups.add(GroupedOpenApi.builder()
-                .group("auth-service")
-                .pathsToMatch("/api/auth/**")
-                .build());
-        
         // Courses Service
         groups.add(GroupedOpenApi.builder()
                 .group("courses-service")
@@ -53,19 +44,7 @@ public class SwaggerConfig {
                 .group("students-service")
                 .pathsToMatch("/api/students/**", "/api/enrollments/**")
                 .build());
-        
-        // Complaints Service
-        groups.add(GroupedOpenApi.builder()
-                .group("complaints-service")
-                .pathsToMatch("/api/complaints/**")
-                .build());
-        
-        // Clubs Service
-        groups.add(GroupedOpenApi.builder()
-                .group("clubs-service")
-                .pathsToMatch("/api/clubs/**")
-                .build());
-        
+
         // Quiz Service
         groups.add(GroupedOpenApi.builder()
                 .group("quiz-service")

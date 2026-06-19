@@ -143,7 +143,7 @@ function smartCompare(a: any, b: any): number {
       justify-content: center; 
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-    .score-circle.passed { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    .score-circle.passed { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
     .score-circle.failed { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
     
     .score-value { 
@@ -190,7 +190,7 @@ function smartCompare(a: any, b: any): number {
     .no-data p { color: #666; font-size: 18px; margin-bottom: 20px; }
     
     .btn-primary { 
-      background: #059669; 
+      background: #2563eb; 
       color: white; 
       border: none; 
       padding: 12px 24px; 

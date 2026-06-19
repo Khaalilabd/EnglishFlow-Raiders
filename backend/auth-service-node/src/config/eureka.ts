@@ -22,7 +22,7 @@ const ipAddr = getContainerIP();
 
 const client = new Eureka({
   instance: {
-    app: 'auth-service',
+    app: 'auth-service-node',
     hostName: ipAddr,
     ipAddr: ipAddr,
     statusPageUrl: `http://${ipAddr}:${port}/health`,
@@ -32,7 +32,7 @@ const client = new Eureka({
       $: port,
       '@enabled': true,
     },
-    vipAddress: 'auth-service',
+    vipAddress: 'auth-service-node',
     dataCenterInfo: {
       '@class': 'com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo',
       name: 'MyOwn',

@@ -262,60 +262,7 @@ services:
       start_period: 60s
     restart: unless-stopped
 
-  complaints-service:
-    image: nadhem917/complaints-service:latest
-    container_name: complaints-service
-    ports:
-      - "8084:8084"
-    environment:
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
-      SPRING_CLOUD_CONFIG_USERNAME: configuser
-      SPRING_CLOUD_CONFIG_PASSWORD: configpass
-    depends_on:
-      config-server:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
-    networks:
-      - microservices-network
-    healthcheck:
-      test: ["CMD", "sh", "-c", "nc -z localhost 8084 || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    restart: unless-stopped
 
-  clubs-service:
-    image: nadhem917/clubs-service:latest
-    container_name: clubs-service
-    ports:
-      - "8085:8085"
-    environment:
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
-      SPRING_CLOUD_CONFIG_USERNAME: configuser
-      SPRING_CLOUD_CONFIG_PASSWORD: configpass
-      SPRING_RABBITMQ_HOST: rabbitmq
-    depends_on:
-      config-server:
-        condition: service_healthy
-      eureka-server:
-        condition: service_healthy
-    networks:
-      - microservices-network
-    healthcheck:
-      test: ["CMD", "sh", "-c", "nc -z localhost 8085 || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    restart: unless-stopped
 
   quiz-service:
     image: nadhem917/quiz-service:latest

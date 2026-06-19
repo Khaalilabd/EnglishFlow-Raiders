@@ -173,18 +173,18 @@ function smartCompare(a: any, b: any): number {
 
     .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
     .search-wrap { position: relative; display: flex; align-items: center; flex: 1; min-width: 220px; background: white; border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 0 12px; gap: 8px; }
-    .search-wrap:focus-within { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,.1); }
+    .search-wrap:focus-within { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.1); }
     .search-wrap svg { color: #9ca3af; flex-shrink: 0; }
     .search-wrap input { flex: 1; border: none; outline: none; padding: 9px 0; font-size: 13.5px; background: transparent; color: #111827; }
     .clear-btn { background: none; border: none; cursor: pointer; color: #9ca3af; font-size: 14px; }
     .filters { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     .filter-select { padding: 9px 12px; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 13px; background: white; color: #374151; cursor: pointer; outline: none; }
-    .filter-select:focus { border-color: #10b981; }
+    .filter-select:focus { border-color: #3b82f6; }
     .sort-dir-btn { width: 36px; height: 36px; border: 1.5px solid #e5e7eb; border-radius: 8px; background: white; cursor: pointer; font-size: 16px; }
     .reset-btn { display: flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1.5px solid #fca5a5; border-radius: 8px; background: #fef2f2; color: #dc2626; font-size: 13px; font-weight: 600; cursor: pointer; }
 
     .loading { text-align: center; padding: 48px 20px; color: #6b7280; }
-    .spinner { width: 40px; height: 40px; border: 3px solid #e5e7eb; border-top-color: #10b981; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+    .spinner { width: 40px; height: 40px; border: 3px solid #e5e7eb; border-top-color: #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .empty-state { text-align: center; padding: 32px 20px; background: white; border-radius: 12px; border: 1px solid #e5e7eb; }
@@ -197,10 +197,10 @@ function smartCompare(a: any, b: any): number {
     .course-card.enrolled { border-color: #a7f3d0; background: #f0fdf4; }
     .course-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
     .badge { padding: 4px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 600; text-transform: uppercase; }
-    .badge-beginner    { background: #ecfdf5; color: #059669; }
+    .badge-beginner    { background: #ecfdf5; color: #2563eb; }
     .badge-intermediate{ background: #eff6ff; color: #2563eb; }
     .badge-advanced    { background: #fef2f2; color: #dc2626; }
-    .enrolled-badge { padding: 4px 10px; background: #ecfdf5; color: #059669; border-radius: 6px; font-size: 11.5px; font-weight: 600; }
+    .enrolled-badge { padding: 4px 10px; background: #ecfdf5; color: #2563eb; border-radius: 6px; font-size: 11.5px; font-weight: 600; }
     .course-card h3 { font-size: 17px; font-weight: 700; color: #111827; margin: 0 0 6px 0; }
     .course-instructor { font-size: 13px; color: #6b7280; margin: 0 0 10px 0; }
     .course-description { font-size: 13px; color: #6b7280; margin: 0 0 14px 0; line-height: 1.5; }
@@ -208,14 +208,14 @@ function smartCompare(a: any, b: any): number {
     .course-duration { font-size: 13px; color: #6b7280; }
 
     .btn-primary, .btn-secondary, .btn-danger-outline { padding: 8px 16px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; }
-    .btn-primary { background: #059669; color: white; }
-    .btn-primary:hover { background: #047857; }
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-primary:hover { background: #1d4ed8; }
     .btn-secondary { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
     .btn-secondary:hover { background: #e5e7eb; }
     .btn-danger-outline { background: transparent; color: #ef4444; border: 1px solid #fca5a5; }
     .btn-danger-outline:hover { background: #fef2f2; }
 
-    .success-toast { position: fixed; bottom: 28px; right: 28px; background: #059669; color: white; padding: 14px 20px; border-radius: 10px; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 20px rgba(5,150,105,.3); z-index: 1000; animation: slideIn 0.3s ease-out; }
+    .success-toast { position: fixed; bottom: 28px; right: 28px; background: #2563eb; color: white; padding: 14px 20px; border-radius: 10px; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 20px rgba(37,99,235,.3); z-index: 1000; animation: slideIn 0.3s ease-out; }
     @keyframes slideIn { from { transform: translateX(300px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     @media (max-width: 768px) { .my-courses-container { padding: 16px; } .courses-grid { grid-template-columns: 1fr; } }
   `]

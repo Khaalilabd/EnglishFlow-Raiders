@@ -37,15 +37,6 @@ scrape_configs:
     static_configs:
       - targets: ['student-service:8083']
 
-  - job_name: 'complaints-service'
-    metrics_path: '/actuator/prometheus'
-    static_configs:
-      - targets: ['complaints-service:8084']
-
-  - job_name: 'clubs-service'
-    metrics_path: '/actuator/prometheus'
-    static_configs:
-      - targets: ['clubs-service:8085']
 
   - job_name: 'quiz-service'
     metrics_path: '/actuator/prometheus'
